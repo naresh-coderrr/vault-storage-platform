@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VAULT — Cluster Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root {
+  --primary:       #6366F1;
+  --primary-glow:  rgba(99,102,241,0.35);
+  --primary-dim:   rgba(99,102,241,0.12);
+  --success:       #22C55E;
+  --success-glow:  rgba(34,197,94,0.30);
+  --success-dim:   rgba(34,197,94,0.10);
+  --warning:       #F59E0B;
+  --warning-glow:  rgba(245,158,11,0.30);
+  --warning-dim:   rgba(245,158,11,0.10);
+  --danger:        #EF4444;
+  --danger-glow:   rgba(239,68,68,0.30);
+  --danger-dim:    rgba(239,68,68,0.10);
+  --info:          #3B82F6;
+  --info-glow:     rgba(59,130,246,0.30);
+  --info-dim:      rgba(59,130,246,0.10);
+
+  /* Dark theme */
+  --bg:            #0A0A0F;
+  --surface:       #12121A;
+  --surface2:      #1A1A26;
+  --surface3:      #222230;
+  --border:        rgba(255,255,255,0.08);
+  --border2:       rgba(255,255,255,0.14);
+  --text:          #F1F5F9;
+  --text-muted:    #94A3B8;
+  --text-faint:    #475569;
+  --sidebar-w:     240px;
+  --topbar-h:      64px;
+  --radius:        14px;
+  --radius-sm:     8px;
+  --shadow:        0 4px 24px rgba(0,0,0,0.45);
+  --shadow-lg:     0 12px 48px rgba(0,0,0,0.6);
+  --transition:    0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="light"] {
+  --bg:            #F1F5F9;
+  --surface:       #FFFFFF;
+  --surface2:      #F8FAFC;
+  --surface3:      #EEF2FF;
+  --border:        rgba(0,0,0,0.08);
+  --border2:       rgba(0,0,0,0.14);
+  --text:          #0F172A;
+  --text-muted:    #475569;
+  --text-faint:    #94A3B8;
+  --shadow:        0 4px 24px rgba(0,0,0,0.10);
+  --shadow-lg:     0 12px 48px rgba(0,0,0,0.15);
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+  transition: background var(--transition), border-color var(--transition);
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--primary), #818CF8);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: #fff;
+  letter-spacing: -1px;
+  box-shadow: 0 4px 12px var(--primary-glow);
+  flex-shrink: 0;
+}
+.logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.logo-text span { color: var(--primary); }
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 18px 20px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: var(--primary-dim);
+  color: var(--primary);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+  margin-left: -8px;
+}
+.nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--primary), #EC4899);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.avatar-info { flex: 1; min-width: 0; }
+.avatar-name { font-size: 13px; font-weight: 600; }
+.avatar-role { font-size: 11px; color: var(--text-muted); }
+
+/* ============================================================
+   MAIN LAYOUT
+============================================================ */
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   TOP NAVBAR
+============================================================ */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  backdrop-filter: blur(12px);
+  transition: background var(--transition);
+}
+.topbar-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-muted);
+}
+.topbar-breadcrumb .sep { color: var(--text-faint); }
+.topbar-breadcrumb .current { color: var(--text); font-weight: 600; }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+.cluster-health-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--success-dim);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 600; color: var(--success);
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--success-glow); transform: scale(1); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 5px transparent; transform: scale(1.15); }
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+.icon-btn:hover { background: var(--surface3); color: var(--text); }
+
+/* ============================================================
+   PAGE CONTENT
+============================================================ */
+.page-content {
+  padding: 28px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ============================================================
+   HERO SECTION
+============================================================ */
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
+}
+.hero-left {}
+.hero-title {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 30px; font-weight: 800; letter-spacing: -0.8px;
+  margin-bottom: 6px;
+}
+.hero-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+.stat-chips {
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.stat-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 7px 16px;
+  font-size: 13px; font-weight: 500;
+  transition: all var(--transition);
+}
+.stat-chip:hover { border-color: var(--border2); transform: translateY(-1px); }
+.stat-chip .chip-num { font-weight: 700; font-size: 15px; }
+.chip-total .chip-num { color: var(--primary); }
+.chip-healthy .chip-num { color: var(--success); }
+.chip-degraded .chip-num { color: var(--warning); }
+.chip-offline .chip-num { color: var(--danger); }
+
+.hero-right {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+/* Engineer View Toggle */
+.engineer-toggle-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 600;
+}
+.toggle-switch {
+  width: 42px; height: 24px;
+  background: var(--surface3);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s;
+  border: none;
+  outline: none;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch.on::after { transform: translateX(18px); }
+.toggle-label { color: var(--text-muted); }
+.toggle-label.active { color: var(--primary); }
+
+/* Radial Gauge */
+.gauge-container {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.gauge-svg { filter: drop-shadow(0 0 16px rgba(99,102,241,0.4)); }
+.gauge-label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+/* ============================================================
+   CARDS & PANELS
+============================================================ */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: background var(--transition), border-color var(--transition);
+}
+.panel-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-size: 15px; font-weight: 700; flex: 1;
+}
+.panel-badge {
+  font-size: 11px; font-weight: 600;
+  background: var(--primary-dim);
+  color: var(--primary);
+  border-radius: 99px;
+  padding: 3px 10px;
+}
+.panel-icon { font-size: 18px; }
+
+/* ============================================================
+   TOPOLOGY CANVAS
+============================================================ */
+.topology-wrap {
+  padding: 0;
+  position: relative;
+}
+.topology-canvas {
+  width: 100%;
+  height: 520px;
+  display: block;
+  position: relative;
+}
+canvas#topologyCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.topology-legend {
+  display: flex; gap: 20px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.legend-line {
+  width: 20px; height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+/* ============================================================
+   NODE CARDS GRID
+============================================================ */
+.node-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+.node-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  transition: all var(--transition);
+  animation: cardIn 0.5s both;
+}
+.node-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.node-card.healthy { border-left: 4px solid var(--success); box-shadow: inset 4px 0 12px -4px var(--success-glow); }
+.node-card.degraded { border-left: 4px solid var(--warning); box-shadow: inset 4px 0 12px -4px var(--warning-glow); }
+.node-card.offline  { border-left: 4px solid var(--danger);  box-shadow: inset 4px 0 12px -4px var(--danger-glow); opacity: 0.75; }
+
+.node-card-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px 18px 12px;
+}
+.node-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.node-icon.healthy  { background: var(--success-dim); }
+.node-icon.degraded { background: var(--warning-dim); }
+.node-icon.offline  { background: var(--danger-dim); }
+.node-info { flex: 1; min-width: 0; }
+.node-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node-endpoint { font-size: 11px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+.node-status-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 99px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.node-status-badge.healthy  { background: var(--success-dim);  color: var(--success); }
+.node-status-badge.degraded { background: var(--warning-dim);  color: var(--warning); }
+.node-status-badge.offline  { background: var(--danger-dim);   color: var(--danger); }
+
+.node-card-body { padding: 0 18px 14px; }
+
+.storage-bar-wrap { margin-bottom: 14px; }
+.storage-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; margin-bottom: 6px;
+}
+.storage-bar-label .used { font-weight: 600; }
+.storage-bar-label .pct  { color: var(--text-muted); font-weight: 600; }
+.storage-bar {
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.storage-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s ease;
+}
+.storage-bar-fill.healthy  { background: linear-gradient(90deg, var(--success), #4ADE80); }
+.storage-bar-fill.degraded { background: linear-gradient(90deg, var(--warning), #FCD34D); }
+.storage-bar-fill.offline  { background: linear-gradient(90deg, var(--danger),  #F87171); }
+
+.node-metrics {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin-bottom: 14px;
+}
+.metric-item { display: flex; flex-direction: column; gap: 3px; }
+.metric-label { font-size: 10px; color: var(--text-faint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.metric-value { font-size: 15px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.metric-value.good { color: var(--success); }
+.metric-value.warn { color: var(--warning); }
+.metric-value.bad  { color: var(--danger); }
+
+.heartbeat-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.hb-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  animation: pulse-glow 2s infinite;
+}
+.hb-dot.healthy  { background: var(--success); }
+.hb-dot.degraded { background: var(--warning); }
+.hb-dot.offline  { background: var(--danger); animation: none; }
+.hb-time { font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+.degraded-banner {
+  background: var(--warning-dim);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--warning);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+
+.offline-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,15,0.6);
+  backdrop-filter: blur(2px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 8px;
+  z-index: 5;
+}
+.node-card.offline .offline-overlay { display: flex; }
+.offline-overlay-text { font-size: 14px; font-weight: 700; color: var(--danger); }
+.offline-overlay-sub  { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+.node-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-primary { background: var(--primary-dim); color: var(--primary); border-color: rgba(99,102,241,0.25); }
+.btn-primary:hover { background: var(--primary); color: #fff; box-shadow: 0 4px 12px var(--primary-glow); }
+.btn-warning { background: var(--warning-dim); color: var(--warning); border-color: rgba(245,158,11,0.25); }
+.btn-warning:hover { background: var(--warning); color: #fff; box-shadow: 0 4px 12px var(--warning-glow); }
+.btn-danger  { background: var(--danger-dim);  color: var(--danger);  border-color: rgba(239,68,68,0.25); }
+.btn-danger:hover  { background: var(--danger);  color: #fff; box-shadow: 0 4px 12px var(--danger-glow); }
+.btn-ghost  { background: transparent; color: var(--text-muted); border-color: var(--border2); }
+.btn-ghost:hover  { background: var(--surface2); color: var(--text); }
+.btn-success { background: var(--success-dim); color: var(--success); border-color: rgba(34,197,94,0.25); }
+.btn-success:hover { background: var(--success); color: #fff; box-shadow: 0 4px 12px var(--success-glow); }
+
+/* ============================================================
+   REPLICATION MATRIX
+============================================================ */
+.matrix-wrap { overflow-x: auto; padding: 0 22px 22px; }
+.matrix-table {
+  width: 100%; min-width: 700px;
+  border-collapse: separate; border-spacing: 4px;
+}
+.matrix-table th {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  padding: 6px 4px; text-align: center;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.matrix-table th.file-col { text-align: left; }
+.matrix-table td {
+  text-align: center; padding: 6px 4px;
+  font-size: 12px;
+}
+.matrix-table td.file-name {
+  text-align: left;
+  font-size: 12px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  padding-left: 0;
+  white-space: nowrap;
+}
+.matrix-cell {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+}
+.matrix-cell.ok      { background: var(--success-dim); color: var(--success); }
+.matrix-cell.missing { background: var(--danger-dim);  color: var(--danger);  }
+.matrix-cell.repair  { background: var(--warning-dim); color: var(--warning); }
+.matrix-cell:hover   { transform: scale(1.2); z-index: 5; }
+
+.matrix-cell .cell-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+.matrix-cell:hover .cell-tooltip { display: block; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin-icon { display: inline-block; animation: spin 1s linear infinite; }
+
+/* ============================================================
+   EVENT LOG
+============================================================ */
+.event-log-wrap { padding: 0 22px 18px; max-height: 360px; overflow-y: auto; }
+.filter-tabs {
+  display: flex; gap: 6px; padding: 16px 22px 12px;
+}
+.filter-tab {
+  padding: 5px 14px; border-radius: 99px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text-muted);
+  transition: all var(--transition);
+}
+.filter-tab.active {
+  background: var(--primary-dim); color: var(--primary);
+  border-color: rgba(99,102,241,0.25);
+}
+.filter-tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+.event-row {
+  display: grid;
+  grid-template-columns: 130px 36px 1fr auto;
+  align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  animation: eventIn 0.4s both;
+}
+@keyframes eventIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.event-row:last-child { border-bottom: none; }
+.event-time { font-size: 11px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+.event-icon {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.event-icon.repair  { background: var(--success-dim); }
+.event-icon.warning { background: var(--warning-dim); }
+.event-icon.info    { background: var(--info-dim); }
+.event-icon.danger  { background: var(--danger-dim); }
+.event-desc { font-size: 13px; color: var(--text); }
+.event-desc .highlight { font-weight: 600; }
+.event-status {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
+  text-transform: uppercase; white-space: nowrap;
+}
+.event-status.done    { background: var(--success-dim); color: var(--success); }
+.event-status.warning { background: var(--warning-dim); color: var(--warning); }
+.event-status.active  { background: var(--info-dim);    color: var(--info); }
+.event-status.error   { background: var(--danger-dim);  color: var(--danger); }
+
+/* ============================================================
+   ENGINEER VIEW PANELS
+============================================================ */
+.engineer-section { display: none; flex-direction: column; gap: 28px; }
+.engineer-section.visible { display: flex; }
+
+/* JSON Panel */
+.json-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.json-body {
+  padding: 18px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  max-height: 320px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.3);
+}
+.json-key   { color: #818CF8; }
+.json-str   { color: #4ADE80; }
+.json-num   { color: #FCD34D; }
+.json-bool  { color: #F472B6; }
+.json-null  { color: var(--text-faint); }
+
+/* Chunk table */
+.chunk-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.chunk-table th {
+  text-align: left; padding: 10px 16px;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.chunk-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.chunk-table tr:last-child td { border-bottom: none; }
+.chunk-table tr:hover td { background: var(--surface2); }
+.hash-cell { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+/* Latency Heatmap */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(9, 1fr);
+  gap: 3px;
+  padding: 18px 22px;
+  font-size: 11px;
+}
+.hm-label { color: var(--text-muted); font-weight: 600; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.hm-label.row-label { justify-content: flex-end; padding-right: 8px; }
+.hm-cell {
+  height: 34px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+  cursor: default;
+  transition: transform var(--transition);
+}
+.hm-cell:hover { transform: scale(1.1); z-index: 2; }
+.hm-self { background: var(--surface3); color: var(--text-faint); }
+
+/* Bandwidth Charts */
+.bw-charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 18px 22px; }
+.bw-chart { display: flex; flex-direction: column; gap: 8px; }
+.bw-chart-label { font-size: 12px; font-weight: 600; }
+.bw-bars { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
+.bw-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bw-bar {
+  width: 100%; border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top, var(--primary), #818CF8);
+  transition: height 0.8s ease;
+  min-height: 4px;
+}
+.bw-bar-tick { font-size: 9px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+
+/* ============================================================
+   SECTION HEADER
+============================================================ */
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.section-subtitle { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+/* ============================================================
+   THEME TOGGLE (top-right)
+============================================================ */
+.theme-toggle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { background: var(--surface3); transform: rotate(20deg); }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .main-wrap { margin-left: 0; }
+  .hero-section { grid-template-columns: 1fr; }
+  .node-cards-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   MISC UTILITIES
+============================================================ */
+.mt-0 { margin-top: 0 !important; }
+.flex { display: flex; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.text-muted { color: var(--text-muted); }
+.text-xs { font-size: 11px; }
+.fw-600 { font-weight: 600; }
+.p-panel { padding: 22px; }
+
+/* Node click highlight */
+.node-card.highlighted {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 24px var(--primary-glow);
+}
+
+/* Scroll hint */
+.scroll-to-card { scroll-margin-top: 80px; }
+
+/* Notification toast */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  animation: toastIn 0.4s ease;
+  max-width: 340px;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.toast.hide { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(20px); }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR
+============================================================ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">V</div>
+    <div class="logo-text">VAU<span>LT</span></div>
+  </div>
+
+  <div class="sidebar-section-label">Navigation</div>
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">⬡</span> Dashboard
+  </a>
+  <a href="files.html" class="nav-item">
+    <span class="nav-icon">🗂</span> Files
+  </a>
+  <a href="cluster.html" class="nav-item active">
+    <span class="nav-icon">🔷</span> Cluster
+  </a>
+  <a href="chaos.html" class="nav-item">
+    <span class="nav-icon">⚡</span> Chaos Lab
+  </a>
+  <a href="settings.html" class="nav-item">
+    <span class="nav-icon">⚙</span> Settings
+  </a>
+
+  <div class="sidebar-section-label" style="margin-top:12px;">System</div>
+  <div class="nav-item" style="cursor:default;">
+    <span class="nav-icon">💾</span>
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:700;color:var(--text);">Storage</div>
+      <div style="height:4px;background:var(--surface3);border-radius:99px;margin-top:4px;">
+        <div style="width:61%;height:100%;background:linear-gradient(90deg,var(--primary),#818CF8);border-radius:99px;"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text-faint);margin-top:3px;">18.3 TB / 30 TB</div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="avatar">AE</div>
+    <div class="avatar-info">
+      <div class="avatar-name">Admin</div>
+      <div class="avatar-role">Engineer</div>
+    </div>
+    <button class="icon-btn" style="margin-left:auto;width:28px;height:28px;font-size:13px;">⋯</button>
+  </div>
+</aside>
+
+<!-- ============================================================
+     TOP NAVBAR
+============================================================ -->
+<div class="main-wrap">
+<header class="topbar">
+  <div class="topbar-breadcrumb">
+    <span>VAULT</span>
+    <span class="sep">›</span>
+    <span class="current">Cluster Health</span>
+  </div>
+
+  <div class="cluster-health-badge">
+    <div class="pulse-dot"></div>
+    Cluster Operational
+  </div>
+
+  <div class="topbar-right">
+    <button class="icon-btn" title="Refresh" onclick="refreshAll()">↻</button>
+    <button class="icon-btn" title="Alerts">🔔</button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<!-- ============================================================
+     PAGE CONTENT
+============================================================ -->
+<main class="page-content">
+
+  <!-- HERO -->
+  <section class="hero-section">
+    <div class="hero-left">
+      <div class="hero-title">
+        <span>Cluster Health</span>
+        <div class="pulse-dot" style="width:12px;height:12px;"></div>
+      </div>
+      <p class="hero-subtitle">Real-time distributed node telemetry · Updated <span id="lastUpdate">just now</span></p>
+      <div class="stat-chips">
+        <div class="stat-chip chip-total">
+          <span class="chip-num">9</span> Total Nodes
+        </div>
+        <div class="stat-chip chip-healthy">
+          <span class="chip-num" id="healthyCount">7</span> Healthy
+        </div>
+        <div class="stat-chip chip-degraded">
+          <span class="chip-num" id="degradedCount">1</span> Degraded
+        </div>
+        <div class="stat-chip chip-offline">
+          <span class="chip-num" id="offlineCount">1</span> Offline
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="engineer-toggle-wrap">
+        <span class="toggle-label" id="engLabel">Engineer View</span>
+        <button class="toggle-switch" id="engineerToggle" onclick="toggleEngineer()" aria-label="Engineer View"></button>
+        <span class="toggle-label active" id="engStatus" style="display:none;">ON</span>
+      </div>
+      <div class="gauge-container">
+        <svg class="gauge-svg" width="160" height="160" viewBox="0 0 160 160" id="healthGauge">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#22C55E"/>
+              <stop offset="100%" stop-color="#6366F1"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12" stroke-dasharray="352" stroke-dashoffset="88" stroke-linecap="round" transform="rotate(135 80 80)"/>
+          <!-- Fill -->
+          <circle cx="80" cy="80" r="64" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-dasharray="352" id="gaugeFill"
+            stroke-dashoffset="288" stroke-linecap="round" transform="rotate(135 80 80)"
+            style="transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1); filter: drop-shadow(0 0 8px rgba(99,102,241,0.6))"/>
+          <!-- Center text -->
+          <text x="80" y="74" text-anchor="middle" font-family="Inter" font-size="26" font-weight="800" fill="currentColor" id="gaugeText">94.3</text>
+          <text x="80" y="92" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="rgba(148,163,184,0.9)">%</text>
+          <text x="80" y="108" text-anchor="middle" font-family="Inter" font-size="10" fill="rgba(148,163,184,0.6)">HEALTH SCORE</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOPOLOGY -->
+  <div class="panel topology-wrap">
+    <div class="panel-header">
+      <span class="panel-icon">🕸</span>
+      <span class="panel-title">Cluster Topology</span>
+      <span class="panel-badge">LIVE</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">Click a node to inspect</span>
+    </div>
+    <div class="topology-canvas">
+      <canvas id="topologyCanvas"></canvas>
+    </div>
+    <div class="topology-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--success);box-shadow:0 0 6px var(--success-glow);"></div> Healthy</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--warning);box-shadow:0 0 6px var(--warning-glow);"></div> Degraded</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--danger);box-shadow:0 0 6px var(--danger-glow);"></div> Offline</div>
+      <div class="legend-item"><div class="legend-line"></div> Active Transfer</div>
+      <div class="legend-item"><div style="width:20px;height:2px;border:1px dashed rgba(255,255,255,0.2);border-radius:1px;"></div> Idle Link</div>
+    </div>
+  </div>
+
+  <!-- NODE CARDS -->
+  <section>
+    <div class="section-header">
+      <div class="section-title">Node Inspector</div>
+      <div class="section-subtitle" style="font-family:'JetBrains Mono',monospace;font-size:11px;">Cluster: vault-prod-01</div>
+    </div>
+    <div class="node-cards-grid" id="nodeCardsGrid">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- REPLICATION MATRIX -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-icon">🔲</span>
+      <span class="panel-title">Replication Health Matrix</span>
+      <span class="panel-badge">8 Files × 9 Nodes</span>
+    </div>
+    <div class="matrix-wrap">
+      <table class="matrix-table" id="replicationMatrix">
+        <!-- Populated by JS -->
+      </table>
+    </div>
+  </div>
+
+  <!-- EVENT LOG -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-icon">📋</span>
+      <span class="panel-title">Self-Healing Event Log</span>
+      <span class="panel-badge" id="eventCount">12 Events</span>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterEvents('all', this)">All</button>
+      <button class="filter-tab" onclick="filterEvents('repair', this)">Repairs</button>
+      <button class="filter-tab" onclick="filterEvents('warning', this)">Warnings</button>
+      <button class="filter-tab" onclick="filterEvents('info', this)">Info</button>
+    </div>
+    <div class="event-log-wrap" id="eventLog">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- ENGINEER VIEW PANELS -->
+  <div class="engineer-section" id="engineerSection">
+
+    <!-- JSON Panel -->
+    <div class="panel json-panel">
+      <div class="panel-header">
+        <span class="panel-icon">{ }</span>
+        <span class="panel-title">Raw API Response</span>
+        <span class="panel-badge" style="background:var(--success-dim);color:var(--success);">LIVE FEED</span>
+        <span style="font-size:11px;color:var(--text-faint);margin-left:auto;font-family:'JetBrains Mono',monospace;" id="apiEndpoint">GET /api/v1/cluster/status</span>
+      </div>
+      <div class="json-body" id="jsonPanel"><!-- filled by JS --></div>
+    </div>
+
+    <!-- Chunk Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-icon">🔗</span>
+        <span class="panel-title">Chunk-Level Detail</span>
+        <span class="panel-badge">SHA-256 Verified</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="chunk-table" id="chunkTable"><!-- filled by JS --></table>
+      </div>
+    </div>
+
+    <!-- Latency Heatmap -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-icon">🌡</span>
+        <span class="panel-title">Network Latency Heatmap</span>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">Node-to-Node (ms)</span>
+      </div>
+      <div class="heatmap-grid" id="latencyHeatmap"><!-- filled by JS --></div>
+    </div>
+
+    <!-- Bandwidth Charts -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-icon">📊</span>
+        <span class="panel-title">Bandwidth Utilization</span>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:auto;">Last 7 intervals</span>
+      </div>
+      <div class="bw-charts" id="bwCharts"><!-- filled by JS --></div>
+    </div>
+
+  </div><!-- /engineer-section -->
+
+</main>
+</div><!-- /main-wrap -->
+
+<!-- Toast -->
+<div class="toast" id="toast" style="display:none;"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+'use strict';
+
+/* ---- DATA ---- */
+const NODES = [
+  { id:'alpha',   name:'Storage Node Alpha',   endpoint:'10.0.1.10:9001', status:'healthy',  used:2.1, total:4,   rt:12,  chunks:1247, uptime:99.8, hb:3,   lastSeen:null },
+  { id:'beta',    name:'Storage Node Beta',    endpoint:'10.0.1.11:9001', status:'healthy',  used:1.8, total:4,   rt:9,   chunks:1183, uptime:99.9, hb:2,   lastSeen:null },
+  { id:'gamma',   name:'Storage Node Gamma',   endpoint:'10.0.1.12:9001', status:'healthy',  used:3.1, total:4,   rt:15,  chunks:1412, uptime:99.7, hb:5,   lastSeen:null },
+  { id:'delta',   name:'Storage Node Delta',   endpoint:'10.0.1.13:9001', status:'healthy',  used:0.9, total:4,   rt:11,  chunks:847,  uptime:99.9, hb:1,   lastSeen:null },
+  { id:'epsilon', name:'Storage Node Epsilon', endpoint:'10.0.1.14:9001', status:'degraded', used:2.7, total:4,   rt:284, chunks:1091, uptime:97.3, hb:18,  lastSeen:null },
+  { id:'zeta',    name:'Storage Node Zeta',    endpoint:'10.0.1.15:9001', status:'healthy',  used:1.5, total:4,   rt:13,  chunks:1056, uptime:99.8, hb:4,   lastSeen:null },
+  { id:'eta',     name:'Storage Node Eta',     endpoint:'10.0.1.16:9001', status:'healthy',  used:2.3, total:4,   rt:10,  chunks:1308, uptime:99.9, hb:2,   lastSeen:null },
+  { id:'theta',   name:'Storage Node Theta',   endpoint:'10.0.1.17:9001', status:'healthy',  used:1.2, total:3,   rt:8,   chunks:934,  uptime:99.8, hb:6,   lastSeen:null },
+  { id:'iota',    name:'Storage Node Iota',    endpoint:'10.0.1.18:9001', status:'offline',  used:3.8, total:4,   rt:null,chunks:1523, uptime:91.2, hb:null,lastSeen:'2026-09-25 23:41:02' },
+];
+
+const FILES = [
+  'backup_2026-09-25.tar.gz',
+  'database_snapshot.sql',
+  'media_archive_vol3.zip',
+  'config_bundle.vault',
+  'logs_compressed.bz2',
+  'ml_model_v4.bin',
+  'user_data_export.parquet',
+  'video_stream_raw.mkv',
+];
+
+// Replication matrix: 8 files × 9 nodes; values: 'ok'|'missing'|'repair'
+const MATRIX_DATA = [
+  ['ok','ok','ok','ok','ok','ok','ok','ok','missing'],
+  ['ok','ok','missing','ok','ok','ok','ok','ok','missing'],
+  ['ok','ok','ok','ok','repair','ok','ok','ok','missing'],
+  ['ok','ok','ok','missing','ok','ok','ok','ok','missing'],
+  ['ok','ok','ok','ok','ok','ok','ok','ok','missing'],
+  ['ok','ok','ok','ok','ok','repair','ok','ok','missing'],
+  ['ok','missing','ok','ok','ok','ok','ok','ok','missing'],
+  ['ok','ok','ok','ok','ok','ok','ok','ok','missing'],
+];
+
+const EVENT_TEMPLATES = [
+  { type:'repair',  icon:'✓', desc:'Chunk <b>a4f7…3c2e</b> successfully repaired on <b>Node Gamma</b>', status:'done' },
+  { type:'info',    icon:'ℹ', desc:'<b>Node Beta</b> reconnected to cluster after 42s downtime', status:'active' },
+  { type:'repair',  icon:'✓', desc:'Replication factor restored for <b>media_archive_vol3.zip</b>', status:'done' },
+  { type:'warning', icon:'⚠', desc:'Hash mismatch detected on chunk <b>b9c1…88af</b> — Node Epsilon', status:'warning' },
+  { type:'repair',  icon:'✓', desc:'Chunk <b>f2a9…1d04</b> re-replicated from Alpha → Theta', status:'done' },
+  { type:'info',    icon:'ℹ', desc:'Scheduled integrity scan completed: <b>14,832 chunks verified</b>', status:'active' },
+  { type:'warning', icon:'⚠', desc:'Node Epsilon: elevated response time <b>284ms</b> (threshold: 200ms)', status:'warning' },
+  { type:'repair',  icon:'✓', desc:'Erasure coding re-encoded for <b>backup_2026-09-25.tar.gz</b>', status:'done' },
+  { type:'info',    icon:'ℹ', desc:'Node Iota marked offline — last heartbeat <b>73 min ago</b>', status:'error' },
+  { type:'repair',  icon:'✓', desc:'Missing chunks restored: <b>user_data_export.parquet</b> (3 shards)', status:'done' },
+  { type:'info',    icon:'ℹ', desc:'Auto-rebalance triggered — migrating 127 chunks from Gamma', status:'active' },
+  { type:'repair',  icon:'✓', desc:'Chunk <b>e7b3…c44a</b> verified and re-indexed on Node Delta', status:'done' },
+];
+
+let events = [...EVENT_TEMPLATES].map((e, i) => ({
+  ...e,
+  id: i,
+  time: fmtTime(Date.now() - (EVENT_TEMPLATES.length - i) * 37000)
+}));
+
+let currentFilter = 'all';
+let engineerOn = false;
+let highlightedNode = null;
+
+/* ---- UTILS ---- */
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-US', { hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleString('en-US', { hour12:false });
+}
+function rand(min, max) { return Math.random() * (max - min) + min; }
+function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* ---- THEME ---- */
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  if (html.dataset.theme === 'dark') {
+    html.dataset.theme = 'light';
+    btn.textContent = '☀️';
+  } else {
+    html.dataset.theme = 'dark';
+    btn.textContent = '🌙';
+  }
+  // redraw topology
+  setTimeout(drawTopology, 50);
+}
+
+/* ---- ENGINEER VIEW ---- */
+function toggleEngineer() {
+  engineerOn = !engineerOn;
+  const toggle = document.getElementById('engineerToggle');
+  const section = document.getElementById('engineerSection');
+  const statusLabel = document.getElementById('engStatus');
+  toggle.classList.toggle('on', engineerOn);
+  section.classList.toggle('visible', engineerOn);
+  statusLabel.style.display = engineerOn ? '' : 'none';
+  if (engineerOn) {
+    buildJsonPanel();
+    buildChunkTable();
+    buildHeatmap();
+    buildBwCharts();
+    showToast('🔬 Engineer View activated');
+  }
+}
+
+/* ---- TOAST ---- */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.style.display = 'flex';
+  t.classList.remove('hide');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.add('hide');
+    setTimeout(() => { t.style.display = 'none'; }, 300);
+  }, 2800);
+}
+
+/* ---- GAUGE ---- */
+function animateGauge(pct) {
+  // Track = 270deg arc = 0.75 of circumference
+  const circ = 2 * Math.PI * 64;   // ≈ 402.1
+  const arc  = circ * 0.75;        // ≈ 301.6
+  const fill = arc * (pct / 100);
+  const offset = circ - fill;
+  document.getElementById('gaugeFill').style.strokeDasharray = `${fill} ${circ - fill}`;
+  document.getElementById('gaugeFill').style.strokeDashoffset = '0';
+  // Actually set correctly:
+  const gaugeFill = document.getElementById('gaugeFill');
+  const trackDash = arc * 0.999;
+  const fillLen   = arc * (pct / 100);
+  const gap       = circ - fillLen;
+  gaugeFill.setAttribute('stroke-dasharray', `${fillLen} ${gap}`);
+  gaugeFill.setAttribute('stroke-dashoffset', '0');
+  document.getElementById('gaugeText').textContent = pct.toFixed(1);
+}
+setTimeout(() => animateGauge(94.3), 200);
+
+/* ---- NODE CARDS ---- */
+function buildNodeCards() {
+  const grid = document.getElementById('nodeCardsGrid');
+  grid.innerHTML = '';
+  NODES.forEach((node, idx) => {
+    const pct = Math.round((node.used / node.total) * 100);
+    const card = document.createElement('div');
+    card.className = `node-card ${node.status} scroll-to-card`;
+    card.id = `card-${node.id}`;
+    card.style.animationDelay = `${idx * 0.06}s`;
+
+    const rtColor = node.rt === null ? '' : (node.rt > 200 ? 'bad' : node.rt > 50 ? 'warn' : 'good');
+    const rtDisplay = node.rt === null ? 'N/A' : `${node.rt}ms`;
+    const uptimeColor = node.uptime > 99 ? 'good' : node.uptime > 95 ? 'warn' : 'bad';
+    const hbDisplay = node.hb === null ? 'Unreachable' : `${node.hb}s ago`;
+
+    let degradedBanner = '';
+    if (node.status === 'degraded') {
+      degradedBanner = `<div class="degraded-banner">⚠ High latency detected — node may be under-resourced</div>`;
+    }
+
+    let offlineOverlay = '';
+    if (node.status === 'offline') {
+      offlineOverlay = `
+        <div class="offline-overlay">
+          <div style="font-size:30px;">⛔</div>
+          <div class="offline-overlay-text">Node Unreachable</div>
+          <div class="offline-overlay-sub">Last seen: ${node.lastSeen}</div>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      ${offlineOverlay}
+      <div class="node-card-header">
+        <div class="node-icon ${node.status}">${node.status === 'healthy' ? '🟢' : node.status === 'degraded' ? '🟡' : '🔴'}</div>
+        <div class="node-info">
+          <div class="node-name">${node.name}</div>
+          <div class="node-endpoint">${node.endpoint}</div>
+        </div>
+        <span class="node-status-badge ${node.status}">${node.status}</span>
+      </div>
+      <div class="node-card-body">
+        <div class="storage-bar-wrap">
+          <div class="storage-bar-label">
+            <span class="used">${node.used}TB / ${node.total}TB</span>
+            <span class="pct">${pct}%</span>
+          </div>
+          <div class="storage-bar">
+            <div class="storage-bar-fill ${node.status}" style="width:${pct}%;"></div>
+          </div>
+        </div>
+        ${degradedBanner}
+        <div class="node-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Response</span>
+            <span class="metric-value ${rtColor}">${rtDisplay}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Chunks</span>
+            <span class="metric-value">${node.chunks.toLocaleString()}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Uptime</span>
+            <span class="metric-value ${uptimeColor}">${node.uptime}%</span>
+          </div>
+        </div>
+        <div class="heartbeat-row">
+          <div class="hb-dot ${node.status}"></div>
+          Last heartbeat: <span class="hb-time" id="hb-${node.id}">${hbDisplay}</span>
+        </div>
+        <div class="node-actions">
+          <button class="btn btn-primary btn-sm" onclick="viewChunks('${node.id}')">📦 View Chunks</button>
+          ${node.status !== 'offline' ? `<button class="btn btn-warning btn-sm" onclick="restartNode('${node.id}')">🔄 Restart</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="decommission('${node.id}')">🗑 Decommission</button>
+        </div>
+      </div>`;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      highlightNode(node.id);
+    });
+    grid.appendChild(card);
+  });
+}
+
+function highlightNode(id) {
+  document.querySelectorAll('.node-card.highlighted').forEach(c => c.classList.remove('highlighted'));
+  const card = document.getElementById(`card-${id}`);
+  if (card) {
+    card.classList.add('highlighted');
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+    highlightedNode = id;
+    showToast(`🔷 Inspecting: ${NODES.find(n=>n.id===id).name}`);
+  }
+}
+
+function viewChunks(id) { showToast(`📦 Loading chunks for Node ${id.charAt(0).toUpperCase() + id.slice(1)}…`); }
+function restartNode(id) {
+  if (confirm(`Restart ${NODES.find(n=>n.id===id).name}?\nThis will cause a brief interruption.`)) {
+    showToast(`🔄 Restart command sent to Node ${id}…`);
+  }
+}
+function decommission(id) {
+  if (confirm(`⚠ Decommission ${NODES.find(n=>n.id===id).name}?\nThis action will drain all chunks before removal.`)) {
+    showToast(`🗑 Decommission initiated for Node ${id}…`);
+  }
+}
+
+/* ---- HEARTBEAT UPDATER ---- */
+function updateHeartbeats() {
+  NODES.forEach(node => {
+    if (node.status === 'offline') return;
+    node.hb = Math.max(1, node.hb + randInt(-2, 3));
+    const el = document.getElementById(`hb-${node.id}`);
+    if (el) el.textContent = `${node.hb}s ago`;
+  });
+}
+setInterval(updateHeartbeats, 3000);
+
+/* ---- MATRIX ---- */
+function buildMatrix() {
+  const table = document.getElementById('replicationMatrix');
+  const nodeLabels = ['α','β','γ','δ','ε','ζ','η','θ','ι'];
+  let html = `<thead><tr><th class="file-col">File</th>`;
+  nodeLabels.forEach((l, i) => {
+    html += `<th title="${NODES[i].name}">${l}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  FILES.forEach((file, fi) => {
+    const shortFile = file.length > 28 ? file.slice(0, 26) + '…' : file;
+    html += `<tr><td class="file-name" title="${file}">${shortFile}</td>`;
+    MATRIX_DATA[fi].forEach((cell, ni) => {
+      const icon   = cell === 'ok' ? '✓' : cell === 'missing' ? '✗' : '<span class="spin-icon">↻</span>';
+      const tip    = cell === 'ok' ? `Replica on ${NODES[ni].name}` :
+                     cell === 'missing' ? `Missing — Click to Schedule Repair` :
+                     `Repair in progress on ${NODES[ni].name}`;
+      const tipBtn = cell === 'missing' ? `<br/><button class="btn btn-success btn-sm" style="margin-top:6px;pointer-events:all;" onclick="scheduleRepair(${fi},${ni})">Schedule Repair</button>` : '';
+      html += `<td><div class="matrix-cell ${cell}" onclick="${cell==='missing'?`scheduleRepair(${fi},${ni})`:''}">
+        ${icon}
+        <div class="cell-tooltip">${tip}${tipBtn}</div>
+      </div></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function scheduleRepair(fi, ni) {
+  showToast(`🔧 Repair scheduled: ${FILES[fi].slice(0,20)}… on ${NODES[ni].name}`);
+  MATRIX_DATA[fi][ni] = 'repair';
+  buildMatrix();
+}
+
+/* ---- EVENT LOG ---- */
+function renderEvents() {
+  const log = document.getElementById('eventLog');
+  const filtered = currentFilter === 'all' ? events : events.filter(e => e.type === currentFilter);
+  document.getElementById('eventCount').textContent = `${filtered.length} Events`;
+
+  log.innerHTML = filtered.slice().reverse().map(e => `
+    <div class="event-row" data-type="${e.type}">
+      <span class="event-time">${e.time}</span>
+      <div class="event-icon ${e.type}">${e.icon}</div>
+      <span class="event-desc">${e.desc}</span>
+      <span class="event-status ${e.status}">${e.status}</span>
+    </div>`).join('');
+}
+
+function filterEvents(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEvents();
+}
+
+let newEventTemplates = [
+  { type:'info',    icon:'ℹ', desc:'Heartbeat check: <b>7/9 nodes</b> responded within threshold', status:'active' },
+  { type:'repair',  icon:'✓', desc:'Chunk <b>cc9a…f11b</b> re-verified on Node Theta', status:'done' },
+  { type:'warning', icon:'⚠', desc:'Storage Node Epsilon: disk queue depth exceeded <b>threshold</b>', status:'warning' },
+  { type:'repair',  icon:'✓', desc:'Auto-rebalance completed — <b>84 chunks</b> migrated', status:'done' },
+  { type:'info',    icon:'ℹ', desc:'Peer discovery: new candidate node <b>10.0.1.22:9001</b> detected', status:'active' },
+];
+
+let newEvIdx = 0;
+function appendEvent() {
+  const tpl = newEventTemplates[newEvIdx % newEventTemplates.length];
+  newEvIdx++;
+  events.push({ ...tpl, id: events.length, time: fmtTime(Date.now()) });
+  if (events.length > 30) events.shift();
+  renderEvents();
+  showToast(`📋 New event: ${tpl.icon} ${tpl.type.toUpperCase()}`);
+}
+setInterval(appendEvent, 8000);
+
+/* ---- LAST UPDATE ---- */
+setInterval(() => {
+  document.getElementById('lastUpdate').textContent = 'just now';
+}, 5000);
+
+/* ---- ENGINEER: JSON PANEL ---- */
+function buildJsonPanel() {
+  const now = new Date().toISOString();
+  const data = {
+    cluster_id: "vault-prod-01",
+    timestamp: now,
+    health_score: 94.3,
+    total_nodes: 9,
+    nodes: NODES.map(n => ({
+      id: n.id,
+      endpoint: n.endpoint,
+      status: n.status,
+      storage_used_tb: n.used,
+      storage_total_tb: n.total,
+      response_time_ms: n.rt,
+      chunks_stored: n.chunks,
+      uptime_pct: n.uptime
+    }))
+  };
+  const json = JSON.stringify(data, null, 2);
+  document.getElementById('jsonPanel').innerHTML = syntaxHighlight(json);
+}
+
+function syntaxHighlight(json) {
+  return json
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      let cls = 'json-num';
+      if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-str'; }
+      else if (/true|false/.test(match)) { cls = 'json-bool'; }
+      else if (/null/.test(match)) { cls = 'json-null'; }
+      return `<span class="${cls}">${match}</span>`;
+    });
+}
+
+/* Update JSON every 5s */
+setInterval(() => { if (engineerOn) buildJsonPanel(); }, 5000);
+
+/* ---- ENGINEER: CHUNK TABLE ---- */
+const CHUNK_DATA = [
+  { id:'chunk_001', file:'backup_2026-09-25.tar.gz', node:'Alpha',   hash:'a4f7c3b2e9d14082a3c7f8b2d9e4f1a0c3b7e2d9f4a1b0e3d7f2c9a4b1e8d5', size:'256 MB', verified:'09:41:12' },
+  { id:'chunk_002', file:'backup_2026-09-25.tar.gz', node:'Beta',    hash:'b9c1f88af2e347c1d9a0b3e7f2c5d8a1b4e7c0d3f6a9b2e5c8d1f4a7b0e3d6', size:'256 MB', verified:'09:41:14' },
+  { id:'chunk_003', file:'database_snapshot.sql',    node:'Gamma',   hash:'f2a91d04c7e3b6a0d9f1e8b3c5a2d7f0e3b9c6a1d4f7e0b2c5a8d1f4b7e0c3', size:'128 MB', verified:'09:40:58' },
+  { id:'chunk_004', file:'ml_model_v4.bin',          node:'Delta',   hash:'e7b3c44ae1d9f2b5c8a0d3f6e9b1c4a7d0f3e6b9c2a5d8f1b4e7c0a3d6f9b2', size:'512 MB', verified:'09:41:01' },
+  { id:'chunk_005', file:'media_archive_vol3.zip',   node:'Zeta',    hash:'cc9af11b3e6d1a4c7f0b3e6a9d2f5b8e1c4a7d0f3e6b9c2a5d8f1b4e7c0a3d6', size:'1 GB',  verified:'09:41:22' },
+  { id:'chunk_006', file:'video_stream_raw.mkv',     node:'Eta',     hash:'d1b4e7c0a3d6f9b2e5c8a1d4f7b0e3c6a9d2f5b8e1c4a7d0f3b6a9c2e5d8f1', size:'2 GB',  verified:'09:41:08' },
+  { id:'chunk_007', file:'config_bundle.vault',      node:'Theta',   hash:'a7d0f3b6a9c2e5d8f1b4e7c0d3f6a9b2e5c8d1f4a7b0e3d6f9b2e5c8a1d4f7', size:'4 MB',  verified:'09:41:19' },
+  { id:'chunk_008', file:'user_data_export.parquet', node:'Alpha',   hash:'b0e3c6a9d2f5b8e1c4a7d0f3b6a9c2e5d8f1b4e7c0a3d6f9b2e5c8a1d4f7b0', size:'384 MB', verified:'09:41:31' },
+];
+
+function buildChunkTable() {
+  const table = document.getElementById('chunkTable');
+  table.innerHTML = `<thead><tr>
+    <th>Chunk ID</th><th>File</th><th>Node</th><th>SHA-256 Hash</th><th>Size</th><th>Last Verified</th>
+  </tr></thead><tbody>${CHUNK_DATA.map(c => `<tr>
+    <td class="font-mono" style="color:var(--primary);">${c.id}</td>
+    <td style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;" title="${c.file}">${c.file}</td>
+    <td><span class="node-status-badge healthy" style="font-size:9px;">${c.node}</span></td>
+    <td class="hash-cell">${c.hash.slice(0,20)}…${c.hash.slice(-8)}</td>
+    <td class="font-mono" style="font-size:11px;">${c.size}</td>
+    <td style="font-size:11px;color:var(--text-muted);">${c.verified}</td>
+  </tr>`).join('')}</tbody>`;
+}
+
+/* ---- ENGINEER: HEATMAP ---- */
+const NODE_LABELS_SHORT = ['α','β','γ','δ','ε','ζ','η','θ','ι'];
+const LATENCY_BASE = [
+  [0,  8, 11, 9, 15, 7, 10, 13, -1],
+  [8,  0,  9,12, 18,11,  8, 16, -1],
+  [11, 9,  0, 8, 22, 9, 11, 14, -1],
+  [9, 12,  8, 0, 20,10,  9, 12, -1],
+  [15,18, 22,20,  0,19, 16, 24, -1],
+  [7, 11,  9,10, 19, 0,  8, 11, -1],
+  [10, 8, 11, 9, 16, 8,  0, 13, -1],
+  [13,16, 14,12, 24,11, 13,  0, -1],
+  [-1,-1, -1,-1,  -1,-1, -1,-1,  0],
+];
+
+function latencyColor(ms) {
+  if (ms < 0) return 'rgba(255,255,255,0.03)';
+  if (ms === 0) return 'rgba(99,102,241,0.15)';
+  if (ms <= 10) return 'rgba(34,197,94,0.25)';
+  if (ms <= 18) return 'rgba(34,197,94,0.12)';
+  if (ms <= 22) return 'rgba(245,158,11,0.2)';
+  return 'rgba(239,68,68,0.3)';
+}
+function latencyFg(ms) {
+  if (ms < 0) return 'transparent';
+  if (ms === 0) return 'var(--primary)';
+  if (ms <= 10) return 'var(--success)';
+  if (ms <= 18) return '#86efac';
+  if (ms <= 22) return 'var(--warning)';
+  return 'var(--danger)';
+}
+
+function buildHeatmap() {
+  const grid = document.getElementById('latencyHeatmap');
+  let html = `<div class="hm-label" style="grid-column:1;grid-row:1;"></div>`;
+  NODE_LABELS_SHORT.forEach(l => { html += `<div class="hm-label">${l}</div>`; });
+  NODES.forEach((node, ri) => {
+    html += `<div class="hm-label row-label" title="${node.name}">${NODE_LABELS_SHORT[ri]}</div>`;
+    LATENCY_BASE[ri].forEach((ms, ci) => {
+      const display = ms < 0 ? '×' : ms === 0 ? '—' : `${ms}ms`;
+      html += `<div class="hm-cell" style="background:${latencyColor(ms)};color:${latencyFg(ms)};" title="${ms>0?ms+'ms ('+NODES[ri].name+' → '+NODES[ci].name+')':''}">${display}</div>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+/* ---- ENGINEER: BANDWIDTH ---- */
+function buildBwCharts() {
+  const container = document.getElementById('bwCharts');
+  const nodesSample = NODES.filter(n => n.status !== 'offline').slice(0, 6);
+  container.innerHTML = nodesSample.map(node => {
+    const bars = Array.from({length:7}, () => randInt(20, 95));
+    const barsHtml = bars.map(h => `
+      <div class="bw-bar-wrap">
+        <div class="bw-bar" style="height:${h}%;"></div>
+        <span class="bw-bar-tick">${h}%</span>
+      </div>`).join('');
+    const avg = Math.round(bars.reduce((a,b)=>a+b,0)/bars.length);
+    return `<div class="bw-chart">
+      <div class="bw-chart-label">${node.name.replace('Storage Node ','')}<span style="font-size:10px;color:var(--text-faint);margin-left:6px;">avg ${avg}%</span></div>
+      <div class="bw-bars">${barsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- TOPOLOGY CANVAS ---- */
+const canvas = document.getElementById('topologyCanvas');
+const ctx = canvas.getContext('2d');
+
+let tW, tH, centerX, centerY, radius;
+let nodePositions = [];
+let particles = [];
+let animFrame;
+let flickerState = NODES.map(() => 0);
+
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  tW = canvas.width;
+  tH = canvas.height;
+  centerX = tW / 2;
+  centerY = tH / 2;
+  radius  = Math.min(tW, tH) * 0.35;
+  calcNodePositions();
+}
+
+function calcNodePositions() {
+  nodePositions = NODES.map((_, i) => {
+    const angle = (i / NODES.length) * Math.PI * 2 - Math.PI / 2;
+    return {
+      x: centerX + Math.cos(angle) * radius,
+      y: centerY + Math.sin(angle) * radius,
+    };
+  });
+}
+
+function nodeColor(status) {
+  return status === 'healthy' ? '#22C55E' : status === 'degraded' ? '#F59E0B' : '#EF4444';
+}
+function nodeGlow(status) {
+  return status === 'healthy' ? 'rgba(34,197,94,0.5)' : status === 'degraded' ? 'rgba(245,158,11,0.5)' : 'rgba(239,68,68,0.5)';
+}
+
+function spawnParticle() {
+  const healthyNodes = NODES.map((n,i) => ({n,i})).filter(({n}) => n.status === 'healthy');
+  if (healthyNodes.length < 2) return;
+  const from = healthyNodes[randInt(0, healthyNodes.length-1)];
+  const to   = healthyNodes[randInt(0, healthyNodes.length-1)];
+  if (from.i === to.i) return;
+  particles.push({ fi: from.i, ti: to.i, t: 0, speed: rand(0.004, 0.009) });
+}
+
+function isDark() { return document.documentElement.dataset.theme !== 'light'; }
+
+let gwAngle = 0;
+function drawTopology(ts) {
+  ctx.clearRect(0, 0, tW, tH);
+  gwAngle += 0.008;
+
+  const dark = isDark();
+  const bg    = dark ? '#0A0A0F' : '#F1F5F9';
+  const bdark = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
+
+  // Faint bg fill
+  ctx.fillStyle = bdark;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius + 60, 0, Math.PI*2);
+  ctx.fill();
+
+  // Draw links
+  NODES.forEach((node, i) => {
+    NODES.forEach((_, j) => {
+      if (j <= i) return;
+      const p1 = nodePositions[i], p2 = nodePositions[j];
+      const isActive = node.status === 'healthy' && NODES[j].status === 'healthy';
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = isActive ? (dark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.18)') : (dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)');
+      ctx.lineWidth = 1;
+      ctx.setLineDash(isActive ? [] : [4,6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+  });
+
+  // Particles
+  particles.forEach((p, pi) => {
+    p.t += p.speed;
+    if (p.t >= 1) { particles.splice(pi, 1); return; }
+    const from = nodePositions[p.fi];
+    const to   = nodePositions[p.ti];
+    const x = lerp(from.x, to.x, p.t);
+    const y = lerp(from.y, to.y, p.t);
+    const trail = 0.12;
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, 5);
+    grd.addColorStop(0, 'rgba(99,102,241,0.95)');
+    grd.addColorStop(1, 'rgba(99,102,241,0)');
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  });
+
+  // Gateway center — rotating ring
+  const gwR = 32;
+  // Outer ring
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(gwAngle);
+  const ringGrd = ctx.createConicalGradient ? null : null;
+  for (let r=0; r<4; r++) {
+    const dash = (r % 2 === 0) ? [8,6] : [4,10];
+    ctx.beginPath();
+    ctx.arc(0, 0, gwR + r*6, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(99,102,241,${0.25 - r*0.05})`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash(dash);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+
+  // Gateway fill
+  const gGrd = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, gwR);
+  gGrd.addColorStop(0, '#6366F1');
+  gGrd.addColorStop(1, 'rgba(99,102,241,0.4)');
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, gwR, 0, Math.PI*2);
+  ctx.fillStyle = gGrd;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(99,102,241,0.7)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Gateway label
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 11px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('GW', centerX, centerY - 5);
+  ctx.font = '9px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('GATEWAY', centerX, centerY + 7);
+
+  // Draw nodes
+  NODES.forEach((node, i) => {
+    const pos = nodePositions[i];
+    const col = nodeColor(node.status);
+    const glow = nodeGlow(node.status);
+    const r = 22;
+
+    // Flicker pulse
+    flickerState[i] += 0.04 + Math.random() * 0.02;
+    const pulse = (Math.sin(flickerState[i] + i) + 1) * 0.5;
+
+    // Glow
+    const glowR = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r * 2.5);
+    glowR.addColorStop(0, glow.replace('0.5', String(0.25 + pulse * 0.2)));
+    glowR.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = glowR;
+    ctx.fill();
+
+    // Node circle
+    const nGrd = ctx.createRadialGradient(pos.x - r*0.3, pos.y - r*0.3, 0, pos.x, pos.y, r);
+    nGrd.addColorStop(0, col);
+    nGrd.addColorStop(1, col + '88');
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
+    ctx.fillStyle = nGrd;
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Storage bar inside node
+    const barW = r * 1.4;
+    const pct = node.used / node.total;
+    const barX = pos.x - barW/2;
+    const barY = pos.y + 5;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(barX, barY, barW, 4, 2) : ctx.rect(barX, barY, barW, 4);
+    ctx.fill();
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(barX, barY, barW * pct, 4, 2) : ctx.rect(barX, barY, barW * pct, 4);
+    ctx.fill();
+
+    // Node label (letter)
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.id.charAt(0).toUpperCase(), pos.x, pos.y - 4);
+
+    // Node name below circle
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.7)';
+    ctx.font = '9px Inter, sans-serif';
+    const label = node.id.charAt(0).toUpperCase() + node.id.slice(1);
+    ctx.fillText(label, pos.x, pos.y + r + 12);
+
+    // Highlighted ring
+    if (highlightedNode === node.id) {
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, r + 6, 0, Math.PI*2);
+      ctx.strokeStyle = '#6366F1';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([5,4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  animFrame = requestAnimationFrame(drawTopology);
+}
+
+// Canvas click → highlight card
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+  nodePositions.forEach((pos, i) => {
+    const dx = mx - pos.x, dy = my - pos.y;
+    if (Math.sqrt(dx*dx + dy*dy) < 28) {
+      highlightNode(NODES[i].id);
+    }
+  });
+});
+
+// Spawn particles
+setInterval(spawnParticle, 600);
+
+/* ---- REFRESH ALL ---- */
+function refreshAll() {
+  buildNodeCards();
+  buildMatrix();
+  renderEvents();
+  if (engineerOn) { buildJsonPanel(); buildChunkTable(); buildHeatmap(); buildBwCharts(); }
+  showToast('✅ Cluster data refreshed');
+}
+
+/* ---- INIT ---- */
+window.addEventListener('DOMContentLoaded', () => {
+  buildNodeCards();
+  buildMatrix();
+  renderEvents();
+  resizeCanvas();
+  requestAnimationFrame(drawTopology);
+});
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+</script>
+</body>
+</html>
