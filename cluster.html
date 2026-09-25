@@ -233,7 +233,41 @@
       display: flex; align-items: center; gap: 10px;
       animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(13, 17, 23, 0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--surface-border);
+      z-index: 9999;
+      height: 64px;
+      padding: 6px 12px;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .mobile-nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      gap: 3px;
+      transition: all 0.2s;
+    }
+    .mobile-nav-link.active { color: var(--primary); }
+    .mobile-nav-link span:first-child { font-size: 18px; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-wrapper { margin-left: 0; padding: 16px 14px 90px; }
+      .mobile-bottom-nav { display: flex; }
+      .nodes-grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: stretch; gap: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -243,6 +277,7 @@
     <div class="orb orb-2"></div>
   </div>
 
+  <!-- Desktop Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -258,6 +293,15 @@
     </ul>
   </aside>
 
+  <!-- Mobile Bottom Navigation (Google Drive App Style) -->
+  <nav class="mobile-bottom-nav">
+    <a href="dashboard.html" class="mobile-nav-link"><span>📊</span><span>Dash</span></a>
+    <a href="files.html" class="mobile-nav-link"><span>📁</span><span>Files</span></a>
+    <a href="cluster.html" class="mobile-nav-link active"><span>🖥️</span><span>Nodes</span></a>
+    <a href="chaos.html" class="mobile-nav-link"><span>⚡</span><span>Chaos</span></a>
+    <a href="settings.html" class="mobile-nav-link"><span>⚙️</span><span>Settings</span></a>
+  </nav>
+
   <main class="main-wrapper">
     <div class="topbar">
       <div class="topbar-left">
@@ -265,7 +309,7 @@
         <p>Telemetry across active daemons and physical chunk replication matrix.</p>
       </div>
 
-      <div style="display: flex; gap: 10px;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="runHealthCheck()">🔍 Ping All Nodes</button>
         <button class="btn btn-primary" onclick="openAddNodeModal()">+ Add Storage Node</button>
       </div>

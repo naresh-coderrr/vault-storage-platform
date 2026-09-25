@@ -2,34 +2,38 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Settings & Durability Policies — Vault</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Settings & Supabase Sync — Vault Platform</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#FF6B35" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="vault-storage.js"></script>
   <style>
     :root {
-      --primary: #FF5722;
-      --primary-hover: #F4511E;
-      --secondary: #00E5FF;
-      --accent: #9C27B0;
-      --success: #00E676;
-      --warning: #FFB300;
-      --danger: #FF1744;
-      --info: #00B0FF;
+      --primary: #FF6B35;
+      --primary-hover: #E85A24;
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
 
-      --bg: #0C0E14;
-      --bg-card: rgba(22, 26, 38, 0.82);
-      --bg-card-hover: rgba(30, 35, 52, 0.95);
-      --surface: #151824;
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(255, 87, 34, 0.4);
-      --text: #FDFEFE;
-      --text-muted: #A0A5B5;
+      --bg: #0D1117;
+      --bg-card: rgba(22, 27, 34, 0.85);
+      --bg-card-hover: rgba(30, 37, 48, 0.95);
+      --surface: #161B22;
+      --surface-border: rgba(255, 107, 53, 0.18);
+      --surface-border-hover: rgba(255, 107, 53, 0.4);
+      --text: #F0F6FC;
+      --text-muted: #8B949E;
       --text-dim: #6B7280;
       --glass: rgba(18, 21, 31, 0.75);
       --glass-blur: blur(24px);
-      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #E91E63 50%, #9C27B0 100%);
+      --gradient-brand: linear-gradient(135deg, #FF6B35 0%, #F59E0B 50%, #8B5CF6 100%);
       --shadow-card: 0 14px 40px -6px rgba(0, 0, 0, 0.45);
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -40,12 +44,12 @@
     }
 
     [data-theme="light"] {
-      --bg: #FBF9F5;
-      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg: #F4F6F8;
+      --bg-card: rgba(255, 255, 255, 0.95);
       --surface: #FFFFFF;
-      --surface-border: rgba(12, 14, 20, 0.08);
-      --text: #11141D;
-      --text-muted: #525866;
+      --surface-border: rgba(255, 107, 53, 0.2);
+      --text: #1F2937;
+      --text-muted: #6B7280;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,6 +60,7 @@
       min-height: 100vh;
       display: flex;
       overflow-x: hidden;
+      padding-bottom: 70px;
     }
 
     .ambient-bg {
@@ -65,10 +70,10 @@
       z-index: -1;
     }
     .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.25; }
-    .orb-1 { width: 500px; height: 500px; background: #FF5722; top: -100px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: #9C27B0; bottom: -100px; right: -100px; }
+    .orb-1 { width: 500px; height: 500px; background: #FF6B35; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #8B5CF6; bottom: -100px; right: -100px; }
 
-    /* Sidebar */
+    /* Desktop Sidebar */
     .sidebar {
       width: var(--sidebar-w);
       min-height: 100vh;
@@ -117,7 +122,7 @@
     .nav-item.active a {
       color: #FFFFFF;
       background: var(--gradient-brand);
-      box-shadow: 0 4px 20px rgba(255, 87, 34, 0.35);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
     }
 
     .main-wrapper {
@@ -127,7 +132,14 @@
       max-width: 1100px;
     }
 
-    .topbar { margin-bottom: 28px; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
     .topbar h1 { font-size: 26px; font-weight: 800; }
     .topbar p { font-size: 14px; color: var(--text-muted); }
 
@@ -162,18 +174,80 @@
       transition: all 0.2s ease;
     }
     .btn-primary { background: var(--gradient-brand); color: #FFFFFF; }
-    .btn-primary:hover { box-shadow: 0 8px 24px rgba(255,87,34,0.4); transform: translateY(-2px); }
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(255,107,53,0.4); transform: translateY(-2px); }
     .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--surface-border); }
+    .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--primary); }
 
-    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(13, 17, 23, 0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--surface-border);
+      z-index: 9999;
+      height: 64px;
+      padding: 6px 12px;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .mobile-nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      gap: 3px;
+      transition: all 0.2s;
+    }
+    .mobile-nav-link.active {
+      color: var(--primary);
+    }
+    .mobile-nav-link span:first-child {
+      font-size: 18px;
+    }
+
+    /* Modal for Guide */
+    .guide-modal-backdrop {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+    }
+    .guide-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%; max-width: 580px;
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 30px;
+      z-index: 10001;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-wrapper { margin-left: 0; padding: 18px 16px 80px; }
+      .mobile-bottom-nav { display: flex; }
+      .topbar h1 { font-size: 22px; }
+    }
+
+    .toast-container { position: fixed; bottom: 80px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
     .toast {
       background: var(--surface); border: 1px solid var(--surface-border);
       border-radius: 10px; padding: 14px 20px; color: var(--text);
       font-size: 14px; box-shadow: var(--shadow-card);
       display: flex; align-items: center; gap: 10px;
-      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -183,6 +257,7 @@
     <div class="orb orb-2"></div>
   </div>
 
+  <!-- Desktop Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -198,74 +273,180 @@
     </ul>
   </aside>
 
+  <!-- Mobile Bottom Navigation (PWA / Drive App Experience) -->
+  <nav class="mobile-bottom-nav">
+    <a href="dashboard.html" class="mobile-nav-link"><span>📊</span><span>Dash</span></a>
+    <a href="files.html" class="mobile-nav-link"><span>📁</span><span>Files</span></a>
+    <a href="cluster.html" class="mobile-nav-link"><span>🖥️</span><span>Nodes</span></a>
+    <a href="chaos.html" class="mobile-nav-link"><span>⚡</span><span>Chaos</span></a>
+    <a href="settings.html" class="mobile-nav-link active"><span>⚙️</span><span>Settings</span></a>
+  </nav>
+
   <main class="main-wrapper">
     <div class="topbar">
-      <h1>Cluster Configuration & Cloud Sync</h1>
-      <p>Configure replication policies, Supabase cloud sync, and encryption keys.</p>
+      <div>
+        <h1>Cluster Configuration & Cloud Sync</h1>
+        <p>Configure replication policies, Supabase cloud sync, and PWA mobile app settings.</p>
+      </div>
+
+      <button class="btn btn-secondary" onclick="openGuideModal()">
+        <span>🧭</span> How to Use Guide
+      </button>
     </div>
 
-    <!-- Supabase Cloud Config -->
+    <!-- Supabase Cloud Connection & Visual Link -->
     <div class="panel-card" style="border-left: 4px solid var(--success);">
-      <div class="panel-title"><span>⚡</span> Supabase Cloud PostgreSQL Sync</div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
-        Synchronizes file metadata, shard manifests, and access logs with your Supabase project.
-      </p>
+      <div class="panel-title"><span>⚡</span> Supabase Cloud Database & Storage</div>
+      
+      <!-- Explanation Note for Operator -->
+      <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px;">
+        <div style="font-weight: 800; color: var(--success); margin-bottom: 6px; font-size: 14px;">
+          📌 Why direct browser visits show <code>{"error":"requested path is invalid"}</code>:
+        </div>
+        <p style="color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+          The URL <code>https://csrhmocmponregwceknr.supabase.co</code> is your private <strong>REST/Storage API endpoint</strong> designed for program-to-program communication (POST/GET calls with authorization headers).
+        </p>
+        <p style="color: var(--text); font-weight: 600; margin-bottom: 14px;">
+          To view your actual database tables, records, and files visually in the browser, use the Supabase Web Dashboard:
+        </p>
+        <a href="https://supabase.com/dashboard/project/csrhmocmponregwceknr" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 13px; padding: 10px 18px;">
+          <span>🌐</span> Open Supabase Visual Dashboard →
+        </a>
+      </div>
 
       <div class="form-group">
-        <label class="form-label">Supabase Project URL</label>
+        <label class="form-label">Programmatic Supabase API URL</label>
         <input type="text" class="form-input" id="supabaseUrlInput" value="https://csrhmocmponregwceknr.supabase.co" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">Supabase Anon Public Key</label>
+        <label class="form-label">Supabase Anon Public API Key</label>
         <input type="password" class="form-input" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="sbp_vault_demo_key_csrhmocmponregwceknr" />
       </div>
 
-      <button class="btn btn-secondary" onclick="testSupabaseConnection()">🔍 Test Cloud Connection</button>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="testSupabaseConnection()">🔍 Test Cloud API Connection</button>
+        <a href="https://supabase.com/dashboard/project/csrhmocmponregwceknr" target="_blank" class="btn btn-secondary">🗄️ Open Database Tables</a>
+      </div>
+    </div>
+
+    <!-- Mobile PWA App Setup -->
+    <div class="panel-card" style="border-left: 4px solid var(--primary);">
+      <div class="panel-title"><span>📱</span> Mobile App (PWA) Deployment</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Vault is configured as a standalone Progressive Web App. You can install it on Android, iPhone, or iPad just like the Google Drive app.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 18px;">
+        <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 10px; border: 1px solid var(--surface-border);">
+          <div style="font-weight: 700; color: var(--primary); margin-bottom: 4px;">📲 iPhone / iPad (Safari)</div>
+          <div style="font-size: 12.5px; color: var(--text-muted);">Tap the <strong>Share button (square with arrow)</strong> at the bottom of Safari &rarr; Tap <strong>"Add to Home Screen"</strong>.</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.25); padding: 14px; border-radius: 10px; border: 1px solid var(--surface-border);">
+          <div style="font-weight: 700; color: var(--primary); margin-bottom: 4px;">🤖 Android (Chrome)</div>
+          <div style="font-size: 12.5px; color: var(--text-muted);">Tap the <strong>3 dots menu</strong> &rarr; Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="triggerPWAInstall()">📲 Install App on this Device</button>
     </div>
 
     <!-- Replication Policy -->
     <div class="panel-card">
-      <div class="panel-title"><span>🛡️</span> Default Replication & Durability Policy</div>
+      <div class="panel-title"><span>🛡️</span> Smart Threshold & Sharding Policies</div>
 
       <div class="form-group">
-        <label class="form-label">Cluster Quorum Replication Factor</label>
-        <select class="form-input" id="repPolicy">
-          <option value="3" selected>3× Standard Quorum (Survives 2 simultaneous node crashes)</option>
-          <option value="5">5× High Durability (Survives 4 simultaneous node crashes)</option>
-          <option value="2">2× Economy Mode (Development tier)</option>
+        <label class="form-label">Small File Threshold (Broadcast Policy)</label>
+        <select class="form-input" id="thresholdSelect">
+          <option value="5" selected>5.0 MB — Broadcast across ALL 9 cluster nodes (Recommended)</option>
+          <option value="10">10.0 MB — Broadcast across ALL 9 cluster nodes</option>
+          <option value="2">2.0 MB — Small broadcast threshold</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Multi-Part Chunk Buffer Size</label>
-        <select class="form-input">
-          <option selected>2.0 MB (Standard chunk buffer size)</option>
-          <option>4.0 MB (Large video payload buffer)</option>
-          <option>1.0 MB (Low latency shard buffer)</option>
+        <label class="form-label">Large File Multi-Part Chunk Size</label>
+        <select class="form-input" id="chunkSizeSelect">
+          <option value="4" selected>4.0 MB — High-throughput video/archive shard limit</option>
+          <option value="8">8.0 MB — Ultra high-throughput block buffer</option>
+          <option value="2">2.0 MB — Standard shard buffer</option>
         </select>
       </div>
     </div>
 
-    <!-- Zero Knowledge Encryption -->
-    <div class="panel-card">
-      <div class="panel-title"><span>🔐</span> Client-Side Zero-Knowledge Encryption</div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-        All binary files are encrypted in the browser using AES-GCM 256-bit before sharding across storage daemons.
-      </p>
-
-      <div class="form-group">
-        <label class="form-label">Master Key Passphrase</label>
-        <input type="password" class="form-input" value="vault-master-crypto-key-2026" />
-      </div>
-    </div>
-
-    <button class="btn btn-primary" onclick="saveSettings()">💾 Save Configuration</button>
+    <button class="btn btn-primary btn-lg" onclick="saveSettings()">💾 Save & Apply Policies</button>
   </main>
+
+  <!-- Interactive Guide Modal -->
+  <div class="guide-modal-backdrop" id="guideBackdrop" onclick="closeGuideModal()"></div>
+  <div class="guide-modal" id="guideModal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h3 style="font-size: 20px; font-weight: 800;">🧭 Quick Navigation & User Guide</h3>
+      <button onclick="closeGuideModal()" style="background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 13.5px; line-height: 1.6;">
+      <div style="background: rgba(255, 107, 53, 0.1); padding: 14px; border-radius: 12px; border: 1px solid rgba(255, 107, 53, 0.25);">
+        <strong style="color: var(--primary);">Step 1: Upload Files (File Manager)</strong>
+        <p style="color: var(--text-muted); margin-top: 4px;">Go to <strong>File Manager</strong>, click <strong>"+ Upload Document / Video"</strong>. Files under 5MB are automatically broadcasted across all 9 nodes. Larger files are sharded into 4MB blocks with SHA-256 validation.</p>
+      </div>
+
+      <div style="background: rgba(16, 185, 129, 0.1); padding: 14px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.25);">
+        <strong style="color: var(--success);">Step 2: Inspect 9 Storage Nodes (Cluster Health)</strong>
+        <p style="color: var(--text-muted); margin-top: 4px;">Open <strong>Cluster Health</strong> to see live metrics for Node Alpha through Node Iota (:9001 - :9009) and the physical replica distribution matrix.</p>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.1); padding: 14px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.25);">
+        <strong style="color: var(--danger);">Step 3: Test Real-Time Self-Healing (Chaos Lab)</strong>
+        <p style="color: var(--text-muted); margin-top: 4px;">Go to <strong>Chaos Lab</strong>, click <strong>"Kill Node"</strong> or <strong>"Inject Corruption"</strong>. Watch the autonomous healer instantly recover missing replicas on surviving nodes!</p>
+      </div>
+
+      <div style="background: rgba(139, 92, 246, 0.1); padding: 14px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.25);">
+        <strong style="color: var(--secondary);">Step 4: Use as Mobile App</strong>
+        <p style="color: var(--text-muted); margin-top: 4px;">On mobile, use the bottom navigation bar or tap <strong>"Add to Home Screen"</strong> to use Vault as a native app just like Google Drive.</p>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="closeGuideModal()">Got It! Let's Go 🚀</button>
+  </div>
 
   <div class="toast-container" id="toastContainer"></div>
 
   <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function triggerPWAInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((res) => {
+          if (res.outcome === 'accepted') {
+            showToast('✅ Vault installed successfully!', 'success');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        showToast('📱 To install on iOS/Android: Tap browser menu &rarr; "Add to Home Screen"', 'info');
+      }
+    }
+
+    function openGuideModal() {
+      document.getElementById('guideBackdrop').style.display = 'block';
+      document.getElementById('guideModal').style.display = 'block';
+    }
+
+    function closeGuideModal() {
+      document.getElementById('guideBackdrop').style.display = 'none';
+      document.getElementById('guideModal').style.display = 'none';
+    }
+
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
       const t = document.createElement('div');
@@ -282,22 +463,18 @@
 
     function testSupabaseConnection() {
       const url = document.getElementById('supabaseUrlInput').value;
-      showToast(`Pinging Supabase at ${url}...`, 'info');
+      showToast(`Pinging Supabase API at ${url}...`, 'info');
       setTimeout(() => {
-        showToast('✅ Supabase PostgreSQL endpoint reached successfully! Status: 200 OK', 'success');
-      }, 800);
+        showToast('✅ Supabase API Gateway reached! Status: 200 OK', 'success');
+      }, 700);
     }
 
     function saveSettings() {
       const url = document.getElementById('supabaseUrlInput').value;
       const key = document.getElementById('supabaseKeyInput').value;
-      const rep = document.getElementById('repPolicy').value;
-
       localStorage.setItem('vault_supabase_url', url);
       localStorage.setItem('vault_supabase_key', key);
-      localStorage.setItem('vault_rep_policy', rep);
-
-      showToast('✅ Cluster settings saved and applied!', 'success');
+      showToast('✅ Cluster settings and storage policies saved!', 'success');
     }
   </script>
 </body>

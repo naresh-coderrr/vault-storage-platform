@@ -357,15 +357,114 @@
     .chunk-step.active { border-left: 3px solid var(--primary); color: #FFFFFF; font-weight: 700; }
     .chunk-step.done { border-left: 3px solid var(--success); color: var(--success); }
 
-    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-    .toast {
-      background: var(--surface); border: 1px solid var(--surface-border);
-      border-radius: 10px; padding: 14px 20px; color: var(--text);
-      font-size: 14px; box-shadow: var(--shadow-card);
-      display: flex; align-items: center; gap: 10px;
-      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(13, 17, 23, 0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--surface-border);
+      z-index: 9999;
+      height: 64px;
+      padding: 6px 12px;
+      justify-content: space-around;
+      align-items: center;
     }
-    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .mobile-nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      gap: 3px;
+      transition: all 0.2s;
+    }
+    .mobile-nav-link.active { color: var(--primary); }
+    .mobile-nav-link span:first-child { font-size: 18px; }
+
+    /* Mobile Floating Action Button (FAB) */
+    .mobile-fab {
+      display: none;
+      position: fixed;
+      bottom: 80px; right: 20px;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--gradient-brand);
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+      font-size: 28px;
+      font-weight: 800;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 9998;
+    }
+
+    /* Mobile Category Pills Bar */
+    .mobile-pills-bar {
+      display: none;
+      overflow-x: auto;
+      white-space: nowrap;
+      gap: 8px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pill-btn {
+      padding: 7px 14px;
+      border-radius: 99px;
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .pill-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    /* Guide Modal */
+    .guide-modal-backdrop {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+    }
+    .guide-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%; max-width: 580px;
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 28px;
+      z-index: 10001;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-wrapper { margin-left: 0; padding: 16px 14px 90px; }
+      .mobile-bottom-nav { display: flex; }
+      .mobile-fab { display: flex; }
+      .mobile-pills-bar { display: flex; }
+      .topbar { flex-direction: column; align-items: stretch; }
+      .search-box { width: 100%; max-width: 100%; }
+      .files-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
@@ -375,6 +474,7 @@
     <div class="orb orb-2"></div>
   </div>
 
+  <!-- Desktop Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -400,7 +500,44 @@
     </div>
   </aside>
 
+  <!-- Mobile Bottom Navigation (Google Drive App Style) -->
+  <nav class="mobile-bottom-nav">
+    <a href="dashboard.html" class="mobile-nav-link"><span>📊</span><span>Dash</span></a>
+    <a href="files.html" class="mobile-nav-link active"><span>📁</span><span>Files</span></a>
+    <a href="cluster.html" class="mobile-nav-link"><span>🖥️</span><span>Nodes</span></a>
+    <a href="chaos.html" class="mobile-nav-link"><span>⚡</span><span>Chaos</span></a>
+    <a href="settings.html" class="mobile-nav-link"><span>⚙️</span><span>Settings</span></a>
+  </nav>
+
+  <!-- Mobile Floating Action Button (FAB) for 1-Touch Upload -->
+  <button class="mobile-fab" onclick="openUploadModal()" title="Upload File">
+    <span>+</span>
+  </button>
+
   <main class="main-wrapper">
+    <!-- User Friendly Welcome & Guide Banner -->
+    <div style="background: rgba(255, 107, 53, 0.08); border: 1px solid rgba(255, 107, 53, 0.25); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-weight: 800; color: var(--primary); font-size: 14.5px;">📁 Vault Cloud Drive — Fault-Tolerant Distributed Storage</div>
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
+          Files &lt; 5MB broadcast to all 9 nodes. Large videos/archives shard into 4MB blocks with SHA-256 integrity.
+        </div>
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="openGuideModal()">
+        <span>🧭</span> App Navigation Guide
+      </button>
+    </div>
+
+    <!-- Mobile Category Pills (Horizontal Scroll) -->
+    <div class="mobile-pills-bar">
+      <button class="pill-btn active" onclick="filterCategoryPill('all', this)">📁 All</button>
+      <button class="pill-btn" onclick="filterCategoryPill('documents', this)">📄 Docs</button>
+      <button class="pill-btn" onclick="filterCategoryPill('videos', this)">🎬 Videos</button>
+      <button class="pill-btn" onclick="filterCategoryPill('images', this)">🖼️ Images</button>
+      <button class="pill-btn" onclick="filterCategoryPill('archives', this)">🗜️ Zips</button>
+      <button class="pill-btn" onclick="filterCategoryPill('degraded', this)">⚠️ Degraded</button>
+    </div>
+
     <div class="topbar">
       <div class="search-box">
         <span>🔍</span>
@@ -408,11 +545,11 @@
         <span class="search-hint">Ctrl+K</span>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         <select class="btn btn-secondary" id="repSelect">
-          <option value="3" selected>3× Replication (Quorum)</option>
-          <option value="5">5× Replication (High Durability)</option>
-          <option value="2">2× Replication (Economy)</option>
+          <option value="3" selected>3× Quorum (Standard)</option>
+          <option value="5">5× Quorum (High Durability)</option>
+          <option value="2">2× Economy Mode</option>
         </select>
 
         <button class="btn btn-primary" onclick="openUploadModal()">
@@ -433,6 +570,39 @@
       <!-- Loaded dynamically from permanent IndexedDB / localStorage -->
     </div>
   </main>
+
+  <!-- Interactive Guide Modal -->
+  <div class="guide-modal-backdrop" id="guideBackdrop" onclick="closeGuideModal()"></div>
+  <div class="guide-modal" id="guideModal">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h3 style="font-size: 20px; font-weight: 800;">🧭 Quick Navigation & User Guide</h3>
+      <button onclick="closeGuideModal()" style="background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px; line-height: 1.6;">
+      <div style="background: rgba(255, 107, 53, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255, 107, 53, 0.25);">
+        <strong style="color: var(--primary);">1. How to Upload & Store Files</strong>
+        <p style="color: var(--text-muted); margin-top: 2px;">Click <strong>"+ Upload"</strong> or the floating <strong>+</strong> button on mobile. Choose any PDF, video, or image. It persists permanently in your browser & backend!</p>
+      </div>
+
+      <div style="background: rgba(16, 185, 129, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.25);">
+        <strong style="color: var(--success);">2. Small vs Large File Policies</strong>
+        <p style="color: var(--text-muted); margin-top: 2px;">• <strong>Small (&lt; 5MB):</strong> Broadcast to ALL 9 nodes for instant read.<br>• <strong>Large (&ge; 5MB):</strong> Sharded into 4MB chunks with Web Crypto SHA-256.</p>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.25);">
+        <strong style="color: var(--danger);">3. Download & Verify</strong>
+        <p style="color: var(--text-muted); margin-top: 2px;">Click <strong>"⬇️ Download"</strong> on any file card to reconstruct the verified file. Click <strong>"🔍 Verify"</strong> to test block hashes.</p>
+      </div>
+
+      <div style="background: rgba(139, 92, 246, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.25);">
+        <strong style="color: var(--secondary);">4. Mobile App Experience</strong>
+        <p style="color: var(--text-muted); margin-top: 2px;">On your smartphone, tap <strong>"Add to Home Screen"</strong> in your browser menu to install Vault as a native app with zero lag!</p>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; margin-top: 18px;" onclick="closeGuideModal()">Got It! Let's Explore 🚀</button>
+  </div>
 
   <!-- Detail Drawer -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
@@ -738,6 +908,27 @@
         t.style.transition = 'all 0.3s';
         setTimeout(() => t.remove(), 300);
       }, 3500);
+    }
+
+    function filterCategoryPill(cat, btn) {
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = cat;
+      renderFiles();
+    }
+
+    function openGuideModal() {
+      document.getElementById('guideBackdrop').style.display = 'block';
+      document.getElementById('guideModal').style.display = 'block';
+    }
+
+    function closeGuideModal() {
+      document.getElementById('guideBackdrop').style.display = 'none';
+      document.getElementById('guideModal').style.display = 'none';
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
     window.addEventListener('DOMContentLoaded', loadFiles);
