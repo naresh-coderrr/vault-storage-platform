@@ -10,27 +10,27 @@
   <script src="vault-storage.js"></script>
   <style>
     :root {
-      --primary: #FF5722;
-      --primary-hover: #F4511E;
-      --secondary: #00E5FF;
-      --accent: #9C27B0;
-      --success: #00E676;
-      --warning: #FFB300;
-      --danger: #FF1744;
-      --info: #00B0FF;
+      --primary: #FF6B35;
+      --primary-hover: #E85A24;
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
 
-      --bg: #0C0E14;
-      --bg-card: rgba(22, 26, 38, 0.82);
-      --bg-card-hover: rgba(30, 35, 52, 0.95);
-      --surface: #151824;
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(255, 23, 68, 0.35);
-      --text: #FDFEFE;
-      --text-muted: #A0A5B5;
+      --bg: #0D1117;
+      --bg-card: rgba(22, 27, 34, 0.85);
+      --bg-card-hover: rgba(30, 37, 48, 0.95);
+      --surface: #161B22;
+      --surface-border: rgba(255, 107, 53, 0.18);
+      --surface-border-hover: rgba(239, 68, 68, 0.35);
+      --text: #F0F6FC;
+      --text-muted: #8B949E;
       --text-dim: #6B7280;
       --glass: rgba(18, 21, 31, 0.75);
       --glass-blur: blur(24px);
-      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #E91E63 50%, #9C27B0 100%);
+      --gradient-brand: linear-gradient(135deg, #FF6B35 0%, #F59E0B 50%, #8B5CF6 100%);
       --shadow-card: 0 14px 40px -6px rgba(0, 0, 0, 0.45);
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -41,12 +41,12 @@
     }
 
     [data-theme="light"] {
-      --bg: #FBF9F5;
-      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg: #F4F6F8;
+      --bg-card: rgba(255, 255, 255, 0.95);
       --surface: #FFFFFF;
-      --surface-border: rgba(12, 14, 20, 0.08);
-      --text: #11141D;
-      --text-muted: #525866;
+      --surface-border: rgba(255, 107, 53, 0.2);
+      --text: #1F2937;
+      --text-muted: #6B7280;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,8 +66,8 @@
       z-index: -1;
     }
     .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.25; }
-    .orb-1 { width: 500px; height: 500px; background: #FF1744; top: -100px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: #FFB300; bottom: -100px; right: -100px; }
+    .orb-1 { width: 500px; height: 500px; background: #EF4444; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #FF6B35; bottom: -100px; right: -100px; }
 
     /* Sidebar */
     .sidebar {
@@ -98,6 +98,7 @@
       background: var(--gradient-brand);
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
     }
     .brand-title { font-size: 20px; font-weight: 800; }
 
@@ -118,125 +119,93 @@
     .nav-item.active a {
       color: #FFFFFF;
       background: var(--gradient-brand);
-      box-shadow: 0 4px 20px rgba(255, 87, 34, 0.35);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
     }
 
+    /* Centered Main Content */
     .main-wrapper {
       margin-left: var(--sidebar-w);
       flex: 1;
-      padding: 24px 36px 60px;
-      max-width: 1500px;
+      padding: 32px 40px 60px;
+      max-width: 1400px;
+      margin-right: auto;
     }
 
     .chaos-banner {
-      background: linear-gradient(135deg, rgba(255, 23, 68, 0.12) 0%, rgba(255, 179, 0, 0.12) 100%);
-      border: 1px solid rgba(255, 23, 68, 0.3);
+      background: linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(255,107,53,0.15) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: var(--radius-lg);
       padding: 24px;
       margin-bottom: 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
     }
     .chaos-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 99px;
-      background: var(--danger);
-      color: #FFFFFF;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
+      font-size: 12px; font-weight: 800;
+      background: rgba(239,68,68,0.2); color: var(--danger);
+      padding: 4px 10px; border-radius: 99px;
+      border: 1px solid rgba(239,68,68,0.4);
     }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 14px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 10px;
+      font-family: var(--font); font-weight: 700; font-size: 14px;
+      border: 1px solid transparent; cursor: pointer; text-decoration: none;
       transition: all 0.2s ease;
     }
-    .btn-danger { background: var(--danger); color: #FFFFFF; }
+    .btn-danger { background: rgba(239,68,68,0.2); color: var(--danger); border-color: rgba(239,68,68,0.4); }
+    .btn-danger:hover { background: var(--danger); color: #FFFFFF; }
     .btn-secondary { background: var(--bg-card); color: var(--text); border-color: var(--surface-border); }
-    .btn-secondary:hover { background: var(--bg-card-hover); }
+    .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--surface-border-hover); }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 
+    /* Grid */
     .chaos-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
     }
-    @media (max-width: 1080px) { .chaos-grid { grid-template-columns: 1fr; } }
-
     .panel-card {
       background: var(--bg-card);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg);
-      padding: 26px;
+      padding: 24px;
       box-shadow: var(--shadow-card);
     }
     .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
     }
-    .panel-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .panel-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
     .node-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
-      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px; background: rgba(0,0,0,0.2); border-radius: 10px;
+      margin-bottom: 10px; border: 1px solid var(--surface-border);
     }
-    .node-status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); }
-    .node-status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    .node-status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--success); box-shadow: 0 0 8px var(--success);
+    }
+    .node-status-dot.dead { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
-    .scenario-card {
-      padding: 16px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--surface-border);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: all 0.2s;
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 10px 14px;
+      border-radius: 8px; border: 1px solid var(--surface-border);
+      background: var(--surface); color: var(--text);
+      font-family: var(--font); font-size: 13px; outline: none;
     }
-    .scenario-card:hover {
-      border-color: var(--warning);
-      background: rgba(255, 179, 0, 0.08);
-      transform: translateX(4px);
-    }
+    .form-input:focus { border-color: var(--primary); }
 
-    .log-stream {
-      background: rgba(0,0,0,0.35);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      height: 480px;
-      overflow-y: auto;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .healing-log-box {
+      background: #06090E; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-md); padding: 18px;
+      font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+      height: 320px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
     }
     .log-entry {
       display: flex; gap: 10px; padding-bottom: 8px;
@@ -247,40 +216,15 @@
     .log-time { color: var(--text-dim); }
     .log-msg.err { color: var(--danger); }
     .log-msg.ok { color: var(--success); }
-    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(13, 17, 23, 0.96);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--surface-border);
-      z-index: 9999;
-      height: 64px;
-      padding: 6px 12px;
-      justify-content: space-around;
-      align-items: center;
-    }
-    .mobile-nav-link {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      gap: 3px;
-      transition: all 0.2s;
-    }
-    .mobile-nav-link.active { color: var(--primary); }
-    .mobile-nav-link span:first-child { font-size: 18px; }
+    .log-msg.warn { color: var(--warning); }
+    .log-msg.info { color: var(--secondary); }
 
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main-wrapper { margin-left: 0; padding: 16px 14px 90px; }
-      .mobile-bottom-nav { display: flex; }
-      .chaos-grid { grid-template-columns: 1fr; }
-      .chaos-banner { flex-direction: column; align-items: stretch; gap: 12px; }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; color: var(--text);
+      font-size: 14px; box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 10px;
     }
   </style>
 </head>
@@ -291,7 +235,7 @@
     <div class="orb orb-2"></div>
   </div>
 
-  <!-- Desktop Sidebar -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -307,15 +251,7 @@
     </ul>
   </aside>
 
-  <!-- Mobile Bottom Navigation (Google Drive App Style) -->
-  <nav class="mobile-bottom-nav">
-    <a href="dashboard.html" class="mobile-nav-link"><span>📊</span><span>Dash</span></a>
-    <a href="files.html" class="mobile-nav-link"><span>📁</span><span>Files</span></a>
-    <a href="cluster.html" class="mobile-nav-link"><span>🖥️</span><span>Nodes</span></a>
-    <a href="chaos.html" class="mobile-nav-link active"><span>⚡</span><span>Chaos</span></a>
-    <a href="settings.html" class="mobile-nav-link"><span>⚙️</span><span>Settings</span></a>
-  </nav>
-
+  <!-- Centered Main Content -->
   <main class="main-wrapper">
     <div class="chaos-banner">
       <div>
@@ -378,50 +314,29 @@
 
         <div class="panel-card">
           <div class="panel-header">
-            <div class="panel-title"><span>🧪</span> Anti-Bit-Rot Scrubber Benchmark</div>
+            <div class="panel-title"><span>🧪</span> Bit-Rot Corruption Injector</div>
           </div>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-            Deliberately flip random bytes inside a binary chunk block on disk to simulate magnetic bit decay.
-          </p>
-          <button class="btn btn-secondary" style="width: 100%;" onclick="injectBitRot()">
-            <span>☣️</span> Inject Silent Bit-Rot into Random Chunk
-          </button>
-        </div>
-
-        <div class="panel-card">
-          <div class="panel-header">
-            <div class="panel-title"><span>🧠</span> Multi-Failure Scenarios</div>
+          <div class="form-group">
+            <label class="form-label">Target Stored Object</label>
+            <select class="form-input" id="corruptFileSelect">
+              <option>cloud_security_audit_report.pdf</option>
+              <option>system_architecture_manifest.json</option>
+              <option>financial_ledger_2025.zip</option>
+            </select>
           </div>
-
-          <div class="scenario-card" onclick="runScenario('partition')">
-            <div>
-              <strong>🌐 Partial Network Partition</strong>
-              <div style="font-size: 12px; color: var(--text-muted);">Isolates Node Alpha; Gateway routes reads to surviving peers.</div>
-            </div>
-            <span style="font-size: 18px;">▶</span>
-          </div>
-
-          <div class="scenario-card" onclick="runScenario('cascade')">
-            <div>
-              <strong>🌊 Cascading Node Outage</strong>
-              <div style="font-size: 12px; color: var(--text-muted);">Kills 2 nodes sequentially; auto-heals from 3rd surviving replica.</div>
-            </div>
-            <span style="font-size: 18px;">▶</span>
-          </div>
+          <button class="btn btn-danger" style="width: 100%;" onclick="injectBitRot()">Corrupt Chunk #1 on Node Beta</button>
         </div>
       </div>
 
-      <div class="panel-card" style="display: flex; flex-direction: column;">
+      <!-- Right Column: Real-Time Healing Stream -->
+      <div class="panel-card">
         <div class="panel-header">
-          <div class="panel-title"><span>📡</span> Live Self-Healing & Scrubber Stream</div>
-          <button class="btn btn-sm btn-secondary" onclick="clearLog()">Clear Stream</button>
+          <div class="panel-title"><span>📡</span> Autonomous Self-Healing Log Stream</div>
+          <button class="btn btn-sm btn-secondary" onclick="clearLog()">Clear</button>
         </div>
-
-        <div class="log-stream" id="logStream">
-          <div class="log-entry">
-            <span class="log-time">[00:00.01]</span>
-            <span class="log-msg ok">Cluster initialized with 3 healthy nodes. Quorum: 3x.</span>
-          </div>
+        <div class="healing-log-box" id="healingLog">
+          <div class="log-entry"><span class="log-time">[00:00:01]</span><span class="log-msg info">Scrubber daemon online. 9/9 nodes responding OK.</span></div>
+          <div class="log-entry"><span class="log-time">[00:00:04]</span><span class="log-msg ok">Quorum replication factor verified across active cluster.</span></div>
         </div>
       </div>
     </div>
@@ -430,94 +345,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script>
-    let nodeAlive = { 1: true, 2: true, 3: true };
-
-    function log(msg, type = 'info') {
-      const stream = document.getElementById('logStream');
-      const now = new Date();
-      const timeStr = `[${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().slice(0, 2)}]`;
-      const entry = document.createElement('div');
-      entry.className = 'log-entry';
-      entry.innerHTML = `<span class="log-time">${timeStr}</span> <span class="log-msg ${type}">${msg}</span>`;
-      stream.appendChild(entry);
-      stream.scrollTop = stream.scrollHeight;
-    }
-
-    function killNode(id, name) {
-      if (nodeAlive[id]) {
-        nodeAlive[id] = false;
-        document.getElementById(`dot${id}`).className = 'node-status-dot offline';
-        document.getElementById(`btnKill${id}`).textContent = '🔄 Reboot';
-        document.getElementById(`btnKill${id}`).className = 'btn btn-sm btn-secondary';
-
-        log(`CRITICAL: ${name} missed heartbeat! Node marked OFFLINE.`, 'err');
-        showToast(`☠️ ${name} stopped! Auto-healing worker spawned.`, 'danger');
-
-        setTimeout(() => log(`RepairWorker: Detected 28 under-replicated chunks from ${name}.`, 'warn'), 600);
-        setTimeout(() => log(`RepairWorker: Replicating missing chunks from surviving peers...`, 'info'), 1200);
-        setTimeout(() => {
-          log(`RepairWorker: All 28 chunks successfully re-replicated! 0% data loss.`, 'ok');
-          showToast(`✅ Auto-recovery finished in 1.8s! Zero data loss.`, 'success');
-        }, 1800);
-      } else {
-        nodeAlive[id] = true;
-        document.getElementById(`dot${id}`).className = 'node-status-dot';
-        document.getElementById(`btnKill${id}`).textContent = '☠️ Kill Node';
-        document.getElementById(`btnKill${id}`).className = 'btn btn-sm btn-danger';
-
-        log(`${name} rebooted. Synchronizing metadata with Gateway...`, 'info');
-        setTimeout(() => {
-          log(`${name} is now synchronized & HEALTHY.`, 'ok');
-          showToast(`✅ ${name} restored!`, 'success');
-        }, 600);
-      }
-    }
-
-    function injectLatency(id, name) {
-      log(`LatencyInjector: +2000ms delay applied to ${name}.`, 'warn');
-      showToast(`⏱️ Injected 2000ms delay on ${name}`, 'warning');
-      setTimeout(() => log(`Gateway: Request timeout on ${name}; fallback to secondary node completed in 12ms.`, 'ok'), 700);
-    }
-
-    function injectBitRot() {
-      log(`CHAOS: Injected random bit-flip into block #07 (enterprise_backup.tar.gz).`, 'err');
-      showToast(`☣️ Bit-rot injected into chunk #07! Scrubber running...`, 'danger');
-
-      setTimeout(() => log(`Scrubber: Checksum mismatch on Node Gamma! Expected: 7dccad5f... Got: a19f02c4...`, 'warn'), 800);
-      setTimeout(() => log(`Scrubber: Restoring corrupted chunk from healthy Node Alpha replica...`, 'info'), 1400);
-      setTimeout(() => {
-        log(`Scrubber: Chunk #07 successfully restored and verified with SHA-256.`, 'ok');
-        showToast(`✅ Scrubber silently repaired corrupted block!`, 'success');
-      }, 2000);
-    }
-
-    function runScenario(type) {
-      if (type === 'partition') {
-        log(`SCENARIO: Simulating Network Partition on Node Alpha...`, 'warn');
-        killNode(1, 'Node Alpha');
-      } else if (type === 'cascade') {
-        log(`SCENARIO: Triggering Cascading Node Outage (Node Alpha + Beta)...`, 'err');
-        killNode(1, 'Node Alpha');
-        setTimeout(() => killNode(2, 'Node Beta'), 800);
-      }
-    }
-
-    function restoreAll() {
-      [1, 2, 3].forEach(id => {
-        if (!nodeAlive[id]) {
-          const names = { 1: 'Node Alpha', 2: 'Node Beta', 3: 'Node Gamma' };
-          killNode(id, names[id]);
-        }
-      });
-      log(`ADMIN: All storage nodes restored to full health.`, 'ok');
-      showToast('All cluster nodes restored!', 'success');
-    }
-
-    function clearLog() {
-      document.getElementById('logStream').innerHTML = '';
-      showToast('Log stream cleared', 'info');
-    }
-
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
       const t = document.createElement('div');
@@ -530,6 +357,83 @@
         t.style.transition = 'all 0.3s';
         setTimeout(() => t.remove(), 300);
       }, 3500);
+    }
+
+    function appendLog(msg, type = 'info') {
+      const log = document.getElementById('healingLog');
+      const d = new Date();
+      const time = `[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${type}">${msg}</span>`;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function killNode(num, name) {
+      document.getElementById(`dot${num}`).className = 'node-status-dot dead';
+      const btn = document.getElementById(`btnKill${num}`);
+      btn.textContent = '🔄 Revive Node';
+      btn.className = 'btn btn-sm btn-secondary';
+      btn.onclick = () => reviveNode(num, name);
+
+      showToast(`☠️ ${name} simulated CRASH! Heartbeat missed.`, 'danger');
+      appendLog(`[ALERT] Heartbeat lost for ${name} (:900${num})`, 'err');
+      appendLog(`[HEALER] Under-replicated chunks identified. Spawning worker...`, 'warn');
+
+      setTimeout(() => {
+        appendLog(`[HEALER] Fetching source chunk from surviving healthy node...`, 'info');
+      }, 800);
+
+      setTimeout(() => {
+        appendLog(`[HEALER] Replicated missing shards to surviving peer. Quorum restored!`, 'ok');
+        showToast(`✅ Autonomous Healer recovered all chunks of ${name} on surviving peers!`, 'success');
+      }, 1600);
+    }
+
+    function reviveNode(num, name) {
+      document.getElementById(`dot${num}`).className = 'node-status-dot';
+      const btn = document.getElementById(`btnKill${num}`);
+      btn.textContent = '☠️ Kill Node';
+      btn.className = 'btn btn-sm btn-danger';
+      btn.onclick = () => killNode(num, name);
+
+      showToast(`✅ ${name} reconnected & verified by Scrubber!`, 'success');
+      appendLog(`[SYSTEM] ${name} back online. Scrubber verified block checksums.`, 'ok');
+    }
+
+    function injectLatency(num, name) {
+      showToast(`⏱️ Injected 2000ms synthetic latency into ${name}.`, 'warning');
+      appendLog(`[CHAOS] Synthetic latency of 2000ms applied to ${name}`, 'warn');
+    }
+
+    function injectBitRot() {
+      const file = document.getElementById('corruptFileSelect').value;
+      showToast(`Corrupted chunk #1 checksum for "${file}". Scrubber detecting...`, 'danger');
+      appendLog(`[CORRUPTION] Bit-flip injected into Chunk #1 of ${file}`, 'err');
+      setTimeout(() => {
+        appendLog(`[SCRUBBER] SHA-256 mismatch detected on Node Beta for ${file}`, 'warn');
+        appendLog(`[HEALER] Corrupted chunk discarded. Clean replica pulled from Node Alpha.`, 'ok');
+        showToast(`✅ Anti-Bit-Rot Scrubber repaired "${file}" seamlessly!`, 'success');
+      }, 1000);
+    }
+
+    function restoreAll() {
+      [1, 2, 3].forEach(i => {
+        document.getElementById(`dot${i}`).className = 'node-status-dot';
+        const btn = document.getElementById(`btnKill${i}`);
+        btn.textContent = '☠️ Kill Node';
+        btn.className = 'btn btn-sm btn-danger';
+        const name = i === 1 ? 'Node Alpha' : i === 2 ? 'Node Beta' : 'Node Gamma';
+        btn.onclick = () => killNode(i, name);
+      });
+      appendLog('[SYSTEM] All nodes restored to HEALTHY state.', 'ok');
+      showToast('All cluster storage nodes healthy & operational!', 'success');
+    }
+
+    function clearLog() {
+      document.getElementById('healingLog').innerHTML = '';
+      appendLog('Healing log stream reset.', 'info');
     }
   </script>
 </body>

@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cluster Health & Node Telemetry — Vault</title>
+  <title>Cluster Health & Nodes — Vault Distributed Storage</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="vault-storage.js"></script>
   <style>
     :root {
-      --primary: #FF5722;
-      --primary-hover: #F4511E;
-      --primary-glow: rgba(255, 87, 34, 0.4);
-      --secondary: #00E5FF;
-      --accent: #9C27B0;
-      --success: #00E676;
-      --warning: #FFB300;
-      --danger: #FF1744;
-      --info: #00B0FF;
+      --primary: #FF6B35;
+      --primary-hover: #E85A24;
+      --primary-glow: rgba(255, 107, 53, 0.4);
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
 
-      --bg: #0C0E14;
-      --bg-card: rgba(22, 26, 38, 0.82);
-      --bg-card-hover: rgba(30, 35, 52, 0.95);
-      --surface: #151824;
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(255, 87, 34, 0.4);
-      --text: #FDFEFE;
-      --text-muted: #A0A5B5;
+      --bg: #0D1117;
+      --bg-card: rgba(22, 27, 34, 0.85);
+      --bg-card-hover: rgba(30, 37, 48, 0.95);
+      --surface: #161B22;
+      --surface-border: rgba(255, 107, 53, 0.18);
+      --surface-border-hover: rgba(255, 107, 53, 0.45);
+      --text: #F0F6FC;
+      --text-muted: #8B949E;
       --text-dim: #6B7280;
       --glass: rgba(18, 21, 31, 0.75);
       --glass-blur: blur(24px);
-      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #E91E63 50%, #9C27B0 100%);
+      --gradient-brand: linear-gradient(135deg, #FF6B35 0%, #F59E0B 50%, #8B5CF6 100%);
       --shadow-card: 0 14px 40px -6px rgba(0, 0, 0, 0.45);
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -42,12 +42,12 @@
     }
 
     [data-theme="light"] {
-      --bg: #FBF9F5;
-      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg: #F4F6F8;
+      --bg-card: rgba(255, 255, 255, 0.95);
       --surface: #FFFFFF;
-      --surface-border: rgba(12, 14, 20, 0.08);
-      --text: #11141D;
-      --text-muted: #525866;
+      --surface-border: rgba(255, 107, 53, 0.2);
+      --text: #1F2937;
+      --text-muted: #6B7280;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,6 +58,7 @@
       min-height: 100vh;
       display: flex;
       overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .ambient-bg {
@@ -67,8 +68,8 @@
       z-index: -1;
     }
     .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.25; }
-    .orb-1 { width: 500px; height: 500px; background: #FF5722; top: -100px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: #00E676; bottom: -100px; right: -100px; }
+    .orb-1 { width: 500px; height: 500px; background: #FF6B35; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #8B5CF6; bottom: -100px; right: -100px; }
 
     /* Sidebar */
     .sidebar {
@@ -99,6 +100,7 @@
       background: var(--gradient-brand);
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
     }
     .brand-title { font-size: 20px; font-weight: 800; }
 
@@ -119,14 +121,16 @@
     .nav-item.active a {
       color: #FFFFFF;
       background: var(--gradient-brand);
-      box-shadow: 0 4px 20px rgba(255, 87, 34, 0.35);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
     }
 
+    /* Centered Main Content */
     .main-wrapper {
       margin-left: var(--sidebar-w);
       flex: 1;
-      padding: 24px 36px 60px;
-      max-width: 1500px;
+      padding: 32px 40px 60px;
+      max-width: 1400px;
+      margin-right: auto;
     }
 
     .topbar {
@@ -137,62 +141,54 @@
       gap: 16px;
     }
     .topbar-left h1 { font-size: 26px; font-weight: 800; }
-    .topbar-left p { font-size: 14px; color: var(--text-muted); }
+    .topbar-left p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 14px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 10px;
+      font-family: var(--font); font-weight: 700; font-size: 14px;
+      border: 1px solid transparent; cursor: pointer; text-decoration: none;
       transition: all 0.2s ease;
     }
     .btn-primary { background: var(--gradient-brand); color: #FFFFFF; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4); transform: translateY(-2px); }
     .btn-secondary { background: var(--bg-card); color: var(--text); border-color: var(--surface-border); }
-    .btn-secondary:hover { background: var(--bg-card-hover); }
+    .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--surface-border-hover); }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 
     /* Node Cards Grid */
     .nodes-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 22px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
       margin-bottom: 32px;
     }
     .node-card {
       background: var(--bg-card);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg);
-      padding: 24px;
+      padding: 22px;
       box-shadow: var(--shadow-card);
       transition: all 0.25s ease;
       position: relative;
     }
     .node-card.healthy { border-left: 5px solid var(--success); }
-    .node-card.standby { border-left: 5px solid var(--secondary); opacity: 0.85; }
 
     .node-card-header {
       display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
     }
     .node-title-wrap { display: flex; align-items: center; gap: 10px; }
-    .node-title { font-size: 17px; font-weight: 800; }
+    .node-title { font-size: 16px; font-weight: 800; }
     .node-endpoint { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
     .badge { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; }
-    .badge-success { background: rgba(0,230,118,0.15); color: var(--success); }
-    .badge-secondary { background: rgba(0,229,255,0.15); color: var(--secondary); }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
 
     .node-stats-row {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
       background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px;
-      margin: 16px 0; text-align: center;
+      margin: 14px 0; text-align: center;
     }
-    .node-stat-val { font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: var(--text); }
+    .node-stat-val { font-size: 15px; font-weight: 800; font-family: var(--font-mono); color: var(--text); }
     .node-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
     .progress-bar-wrap {
@@ -217,12 +213,12 @@
     .matrix-cell-check {
       display: inline-flex; align-items: center; justify-content: center;
       width: 24px; height: 24px; border-radius: 6px;
-      background: rgba(0,230,118,0.15); color: var(--success); font-weight: 800;
+      background: rgba(16, 185, 129, 0.15); color: var(--success); font-weight: 800;
     }
     .matrix-cell-missing {
       display: inline-flex; align-items: center; justify-content: center;
       width: 24px; height: 24px; border-radius: 6px;
-      background: rgba(255,23,68,0.15); color: var(--danger); font-weight: 800; cursor: pointer;
+      background: rgba(239, 68, 68, 0.15); color: var(--danger); font-weight: 800; cursor: pointer;
     }
 
     .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
@@ -231,42 +227,6 @@
       border-radius: 10px; padding: 14px 20px; color: var(--text);
       font-size: 14px; box-shadow: var(--shadow-card);
       display: flex; align-items: center; gap: 10px;
-      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(13, 17, 23, 0.96);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--surface-border);
-      z-index: 9999;
-      height: 64px;
-      padding: 6px 12px;
-      justify-content: space-around;
-      align-items: center;
-    }
-    .mobile-nav-link {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      gap: 3px;
-      transition: all 0.2s;
-    }
-    .mobile-nav-link.active { color: var(--primary); }
-    .mobile-nav-link span:first-child { font-size: 18px; }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main-wrapper { margin-left: 0; padding: 16px 14px 90px; }
-      .mobile-bottom-nav { display: flex; }
-      .nodes-grid { grid-template-columns: 1fr; }
-      .topbar { flex-direction: column; align-items: stretch; gap: 12px; }
     }
   </style>
 </head>
@@ -277,7 +237,7 @@
     <div class="orb orb-2"></div>
   </div>
 
-  <!-- Desktop Sidebar -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -293,15 +253,7 @@
     </ul>
   </aside>
 
-  <!-- Mobile Bottom Navigation (Google Drive App Style) -->
-  <nav class="mobile-bottom-nav">
-    <a href="dashboard.html" class="mobile-nav-link"><span>📊</span><span>Dash</span></a>
-    <a href="files.html" class="mobile-nav-link"><span>📁</span><span>Files</span></a>
-    <a href="cluster.html" class="mobile-nav-link active"><span>🖥️</span><span>Nodes</span></a>
-    <a href="chaos.html" class="mobile-nav-link"><span>⚡</span><span>Chaos</span></a>
-    <a href="settings.html" class="mobile-nav-link"><span>⚙️</span><span>Settings</span></a>
-  </nav>
-
+  <!-- Centered Main Content -->
   <main class="main-wrapper">
     <div class="topbar">
       <div class="topbar-left">
@@ -354,7 +306,6 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="vault-storage.js"></script>
   <script>
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
@@ -435,10 +386,8 @@
         let cellsHTML = '';
         ALL_NODES.forEach((node, nIdx) => {
           if (isSmall) {
-            // Small file broadcast: present on ALL 9 nodes
             cellsHTML += `<td><span class="matrix-cell-check" title="${node.name} holds atomic replica">✓</span></td>`;
           } else {
-            // Large file: distributed across assigned nodes or quorums
             const isAssigned = (nIdx < (f.replicationFactor || 3));
             if (isDegraded && nIdx === 2) {
               cellsHTML += `<td><span class="matrix-cell-missing" onclick="repairMatrixFile(this, '${f.id}', '${f.name}')" title="Missing chunk replica! Click to repair">✗</span></td>`;

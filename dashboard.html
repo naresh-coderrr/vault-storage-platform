@@ -10,28 +10,28 @@
   <script src="vault-storage.js"></script>
   <style>
     :root {
-      --primary: #FF5722;
-      --primary-hover: #F4511E;
-      --primary-glow: rgba(255, 87, 34, 0.4);
-      --secondary: #00E5FF;
-      --accent: #9C27B0;
-      --success: #00E676;
-      --warning: #FFB300;
-      --danger: #FF1744;
-      --info: #00B0FF;
+      --primary: #FF6B35;
+      --primary-hover: #E85A24;
+      --primary-glow: rgba(255, 107, 53, 0.4);
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
 
-      --bg: #0C0E14;
-      --bg-card: rgba(22, 26, 38, 0.82);
-      --bg-card-hover: rgba(30, 35, 52, 0.95);
-      --surface: #151824;
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(255, 87, 34, 0.4);
-      --text: #FDFEFE;
-      --text-muted: #A0A5B5;
+      --bg: #0D1117;
+      --bg-card: rgba(22, 27, 34, 0.85);
+      --bg-card-hover: rgba(30, 37, 48, 0.95);
+      --surface: #161B22;
+      --surface-border: rgba(255, 107, 53, 0.18);
+      --surface-border-hover: rgba(255, 107, 53, 0.45);
+      --text: #F0F6FC;
+      --text-muted: #8B949E;
       --text-dim: #6B7280;
       --glass: rgba(18, 21, 31, 0.75);
       --glass-blur: blur(24px);
-      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #E91E63 50%, #9C27B0 100%);
+      --gradient-brand: linear-gradient(135deg, #FF6B35 0%, #F59E0B 50%, #8B5CF6 100%);
       --shadow-card: 0 14px 40px -6px rgba(0, 0, 0, 0.45);
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -42,12 +42,12 @@
     }
 
     [data-theme="light"] {
-      --bg: #FBF9F5;
-      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg: #F4F6F8;
+      --bg-card: rgba(255, 255, 255, 0.95);
       --surface: #FFFFFF;
-      --surface-border: rgba(12, 14, 20, 0.08);
-      --text: #11141D;
-      --text-muted: #525866;
+      --surface-border: rgba(255, 107, 53, 0.2);
+      --text: #1F2937;
+      --text-muted: #6B7280;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,8 +68,8 @@
       z-index: -1;
     }
     .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.25; }
-    .orb-1 { width: 500px; height: 500px; background: #FF5722; top: -100px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: #9C27B0; bottom: -100px; right: -100px; }
+    .orb-1 { width: 500px; height: 500px; background: #FF6B35; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #8B5CF6; bottom: -100px; right: -100px; }
 
     /* Sidebar */
     .sidebar {
@@ -100,7 +100,7 @@
       background: var(--gradient-brand);
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
-      box-shadow: 0 4px 16px rgba(255, 87, 34, 0.35);
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
     }
     .brand-title { font-size: 20px; font-weight: 800; }
 
@@ -121,123 +121,107 @@
     .nav-item.active a {
       color: #FFFFFF;
       background: var(--gradient-brand);
-      box-shadow: 0 4px 20px rgba(255, 87, 34, 0.35);
+      box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
     }
 
     .sidebar-storage {
-      background: var(--surface);
+      background: rgba(0,0,0,0.25);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-md);
       padding: 16px;
       margin-top: auto;
     }
     .storage-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-    .storage-bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
-    .storage-bar-fill { height: 100%; width: 28%; background: var(--gradient-brand); border-radius: 99px; }
+    .storage-bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+    .storage-bar-fill { height: 100%; background: var(--gradient-brand); border-radius: 99px; width: 28%; }
 
-    /* Main Content */
+    /* Main Container (Centered Alignment) */
     .main-wrapper {
       margin-left: var(--sidebar-w);
       flex: 1;
-      padding: 24px 36px 60px;
-      max-width: 1500px;
+      padding: 32px 40px 60px;
+      max-width: 1400px;
+      margin-right: auto;
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       gap: 20px;
     }
     .topbar-left h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-    .topbar-left p { font-size: 14px; color: var(--text-muted); }
-    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-left p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
     .supabase-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 99px;
-      background: rgba(0, 230, 118, 0.12);
-      border: 1px solid rgba(0, 230, 118, 0.35);
-      color: var(--success);
-      font-size: 12px;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 99px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--success); font-size: 12px; font-weight: 800;
     }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-family: var(--font);
-      font-weight: 700;
-      font-size: 14px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 10px;
+      font-family: var(--font); font-weight: 700; font-size: 14px;
+      border: 1px solid transparent; cursor: pointer; text-decoration: none;
       transition: all 0.2s ease;
     }
     .btn-primary { background: var(--gradient-brand); color: #FFFFFF; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,87,34,0.4); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4); transform: translateY(-2px); }
     .btn-secondary { background: var(--bg-card); color: var(--text); border-color: var(--surface-border); }
-    .btn-secondary:hover { background: var(--bg-card-hover); }
+    .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--surface-border-hover); }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 
     .theme-toggle {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--surface-border);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 18px;
+      background: var(--bg-card); border: 1px solid var(--surface-border);
+      color: var(--text); width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer;
     }
 
-    /* Metric Cards Grid */
+    /* 4 Metrics Cards */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
       margin-bottom: 28px;
     }
     .metric-card {
       background: var(--bg-card);
       border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       padding: 22px;
       box-shadow: var(--shadow-card);
-      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .metric-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--surface-border-hover);
+    .metric-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--gradient-brand); opacity: 0; transition: opacity 0.3s ease;
     }
-    .metric-icon {
-      width: 42px; height: 42px;
-      border-radius: 10px;
-      background: rgba(255, 87, 34, 0.12);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      margin-bottom: 14px;
-    }
-    .metric-val { font-size: 30px; font-weight: 800; font-family: var(--font-mono); margin-bottom: 4px; }
-    .metric-title { font-size: 13px; color: var(--text-muted); font-weight: 700; }
-    .metric-sub { font-size: 12px; margin-top: 8px; }
+    .metric-card:hover::before { opacity: 1; }
 
-    /* Dashboard Layout */
+    .metric-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(255, 107, 53, 0.12); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+    .metric-val { font-size: 26px; font-weight: 800; font-family: var(--font-mono); margin-bottom: 4px; }
+    .metric-title { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+    .metric-sub { font-size: 11px; margin-top: 6px; font-weight: 700; }
+
+    /* Dashboard Panels */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 24px;
-      margin-bottom: 32px;
+      gap: 22px;
+      margin-bottom: 28px;
     }
-    @media (max-width: 1080px) { .dashboard-grid { grid-template-columns: 1fr; } }
-
     .panel-card {
       background: var(--bg-card);
       border: 1px solid var(--surface-border);
@@ -246,137 +230,51 @@
       box-shadow: var(--shadow-card);
     }
     .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
     }
-    .panel-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .panel-title {
+      font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;
+    }
 
     .topology-container {
-      position: relative;
-      width: 100%;
-      height: 380px;
+      width: 100%; height: 320px;
+      background: rgba(0,0,0,0.25);
       border-radius: var(--radius-md);
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--surface-border);
+      position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.04);
     }
-    #clusterCanvas { width: 100%; height: 100%; display: block; }
 
     .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: 6px;
+      display: flex; flex-direction: column; gap: 12px;
+      max-height: 320px; overflow-y: auto;
     }
     .activity-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 14px;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      font-size: 13px;
-      animation: fadeIn 0.3s ease;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 8px;
+      background: rgba(255,255,255,0.03); font-size: 13px;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-    .activity-title { font-weight: 700; margin-bottom: 2px; }
-    .activity-time { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+    .activity-title { font-weight: 700; color: var(--text); }
+    .activity-time { font-size: 11px; color: var(--text-muted); }
 
-    /* Recent Files Table */
-    .files-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    /* Table */
+    .files-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .files-table th {
-      text-align: left;
-      padding: 12px 16px;
-      color: var(--text-muted);
-      font-weight: 700;
-      border-bottom: 1px solid var(--surface-border);
-      font-size: 12px;
-      text-transform: uppercase;
+      text-align: left; padding: 12px 14px; color: var(--text-muted);
+      border-bottom: 1px solid var(--surface-border); font-size: 12px; font-weight: 800; text-transform: uppercase;
     }
-    .files-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--surface-border);
-    }
-    .files-table tr:hover td { background: rgba(255,255,255,0.03); }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .badge-success { background: rgba(0,230,118,0.15); color: var(--success); }
-    .badge-warning { background: rgba(255,179,0,0.15); color: var(--warning); }
+    .files-table td { padding: 14px; border-bottom: 1px solid var(--surface-border); }
+    .badge { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
 
     .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
     .toast {
       background: var(--surface); border: 1px solid var(--surface-border);
-    /* Mobile Bottom Navigation Bar (Google Drive App Style) */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(13, 17, 23, 0.96);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--surface-border);
-      z-index: 9999;
-      height: 64px;
-      padding: 6px 12px;
-      justify-content: space-around;
-      align-items: center;
-    }
-    .mobile-nav-link {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      gap: 3px;
-      transition: all 0.2s;
-    }
-    .mobile-nav-link.active { color: var(--primary); }
-    .mobile-nav-link span:first-child { font-size: 18px; }
-
-    /* Guide Modal */
-    .guide-modal-backdrop {
-      display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(8px);
-      z-index: 10000;
-    }
-    .guide-modal {
-      display: none;
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%; max-width: 580px;
-      background: var(--bg-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 20px;
-      padding: 28px;
-      z-index: 10001;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-    }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main-wrapper { margin-left: 0; padding: 16px 14px 90px; }
-      .mobile-bottom-nav { display: flex; }
-      .topbar { flex-direction: column; align-items: stretch; }
-      .topbar-right { justify-content: space-between; width: 100%; flex-wrap: wrap; }
-      .metrics-grid { grid-template-columns: 1fr 1fr; }
-      .dashboard-grid { grid-template-columns: 1fr; }
+      border-radius: 10px; padding: 14px 20px; color: var(--text);
+      font-size: 14px; box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 10px;
     }
   </style>
 </head>
@@ -387,7 +285,7 @@
     <div class="orb orb-2"></div>
   </div>
 
-  <!-- Desktop Sidebar -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-brand">
       <div class="brand-icon">🛡️</div>
@@ -412,26 +310,8 @@
     </div>
   </aside>
 
-  <!-- Mobile Bottom Navigation (Google Drive App Style) -->
-  <nav class="mobile-bottom-nav">
-    <a href="dashboard.html" class="mobile-nav-link active"><span>📊</span><span>Dash</span></a>
-    <a href="files.html" class="mobile-nav-link"><span>📁</span><span>Files</span></a>
-    <a href="cluster.html" class="mobile-nav-link"><span>🖥️</span><span>Nodes</span></a>
-    <a href="chaos.html" class="mobile-nav-link"><span>⚡</span><span>Chaos</span></a>
-    <a href="settings.html" class="mobile-nav-link"><span>⚙️</span><span>Settings</span></a>
-  </nav>
-
+  <!-- Centered Main Content -->
   <main class="main-wrapper">
-    <!-- User Friendly Guide Banner -->
-    <div style="background: rgba(255, 107, 53, 0.08); border: 1px solid rgba(255, 107, 53, 0.25); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-      <div style="font-size: 13.5px;">
-        <span style="font-weight: 800; color: var(--primary);">🚀 Vault Dashboard</span> — Live node telemetry & automatic self-healing.
-      </div>
-      <button class="btn btn-sm btn-secondary" onclick="openGuideModal()">
-        <span>🧭</span> Navigation Guide
-      </button>
-    </div>
-
     <header class="topbar">
       <div class="topbar-left">
         <h1>Cluster Telemetry & Persistent Storage</h1>
@@ -439,38 +319,12 @@
       </div>
 
       <div class="topbar-right">
-        <div class="supabase-badge"><span>⚡</span> 9/9 Nodes Healthy</div>
+        <div class="supabase-badge"><span>⚡</span> 9/9 Nodes Online</div>
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</button>
         <a href="files.html" class="btn btn-primary">+ Upload Object</a>
         <a href="login.html" class="btn btn-secondary" id="userBtn">👤 Sign In</a>
       </div>
     </header>
-
-    <!-- Interactive Guide Modal -->
-    <div class="guide-modal-backdrop" id="guideBackdrop" onclick="closeGuideModal()"></div>
-    <div class="guide-modal" id="guideModal">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-        <h3 style="font-size: 20px; font-weight: 800;">🧭 Quick Navigation & User Guide</h3>
-        <button onclick="closeGuideModal()" style="background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;">✕</button>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px; line-height: 1.6;">
-        <div style="background: rgba(255, 107, 53, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255, 107, 53, 0.25);">
-          <strong style="color: var(--primary);">1. Upload & Shard Files</strong>
-          <p style="color: var(--text-muted); margin-top: 2px;">Open <strong>File Manager</strong>. Files &lt; 5MB replicate to all 9 nodes. Large files shard into 4MB chunks.</p>
-        </div>
-        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.25);">
-          <strong style="color: var(--success);">2. Live Multi-Zone Nodes</strong>
-          <p style="color: var(--text-muted); margin-top: 2px;">Inspect real-time heartbeat and storage bars for all 9 cluster nodes (:9001 - :9009).</p>
-        </div>
-        <div style="background: rgba(239, 68, 68, 0.1); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.25);">
-          <strong style="color: var(--danger);">3. Self-Healing in Chaos Lab</strong>
-          <p style="color: var(--text-muted); margin-top: 2px;">Kill any node in Chaos Lab and watch the background healer automatically reconstruct missing chunks!</p>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" style="width: 100%; margin-top: 18px;" onclick="closeGuideModal()">Got It! Let's Explore 🚀</button>
-    </div>
 
     <!-- 4 Metrics Cards -->
     <section class="metrics-grid">
@@ -482,24 +336,24 @@
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="color: var(--success); background: rgba(0,230,118,0.12);">🟢</div>
-        <div class="metric-val" style="color: var(--success);">3 / 3</div>
-        <div class="metric-title">Storage Daemons Online</div>
-        <div class="metric-sub" style="color: var(--text-muted);">Ports: 9001, 9002, 9003</div>
+        <div class="metric-icon" style="color: var(--success); background: rgba(16,185,129,0.12);">🟢</div>
+        <div class="metric-val" style="color: var(--success);">9 / 9</div>
+        <div class="metric-title">Multi-Zone Storage Nodes</div>
+        <div class="metric-sub" style="color: var(--text-muted);">Ports: 9001 - 9009</div>
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="color: var(--secondary); background: rgba(0,229,255,0.12);">🛡️</div>
+        <div class="metric-icon" style="color: var(--secondary); background: rgba(139,92,246,0.12);">🛡️</div>
         <div class="metric-val" style="color: var(--secondary);">99.999%</div>
         <div class="metric-title">Data Durability Index</div>
-        <div class="metric-sub" style="color: var(--success);">3× Quorum Maintained</div>
+        <div class="metric-sub" style="color: var(--success);">Multi-Region Quorum</div>
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="color: var(--warning); background: rgba(255,179,0,0.12);">⚡</div>
+        <div class="metric-icon" style="color: var(--warning); background: rgba(245,158,11,0.12);">⚡</div>
         <div class="metric-val" id="metricTotalChunks" style="color: var(--warning);">28</div>
-        <div class="metric-title">4MB Chunks / 9-Node Broadcast</div>
-        <div class="metric-sub" style="color: var(--success);">SHA-256 Verified Multi-Zone Quorum</div>
+        <div class="metric-title">4MB Shards & Broadcasts</div>
+        <div class="metric-sub" style="color: var(--success);">SHA-256 Validated</div>
       </div>
     </section>
 
@@ -557,7 +411,6 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="vault-storage.js"></script>
   <script>
     function toggleTheme() {
       const html = document.documentElement;
@@ -761,20 +614,6 @@
       requestAnimationFrame(renderTopology);
     }
     renderTopology();
-
-    function openGuideModal() {
-      document.getElementById('guideBackdrop').style.display = 'block';
-      document.getElementById('guideModal').style.display = 'block';
-    }
-
-    function closeGuideModal() {
-      document.getElementById('guideBackdrop').style.display = 'none';
-      document.getElementById('guideModal').style.display = 'none';
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    }
 
     window.addEventListener('DOMContentLoaded', loadDashboardData);
     window.addEventListener('vault_file_uploaded', loadDashboardData);
