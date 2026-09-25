@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Vault Distributed Storage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #8B5CF6;
+      --primary-hover: #7C3AED;
+      --secondary: #06B6D4;
+      --success: #10B981;
+      --danger: #F43F5E;
+      --bg: #0B0F19;
+      --bg-card: rgba(18, 24, 38, 0.85);
+      --surface: #131B2E;
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --gradient-brand: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
+      --shadow-glow: 0 10px 40px -10px rgba(139, 92, 246, 0.4);
+      --radius-lg: 20px;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg: #F8FAFC;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --surface: #FFFFFF;
+      --surface-border: rgba(15, 23, 42, 0.08);
+      --text: #0F172A;
+      --text-muted: #475569;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background */
+    .ambient-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.3;
+    }
+    .orb-1 { width: 500px; height: 500px; background: #8B5CF6; top: -100px; left: -100px; }
+    .orb-2 { width: 500px; height: 500px; background: #06B6D4; bottom: -100px; right: -100px; }
+
+    /* Card */
+    .auth-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      backdrop-filter: blur(24px);
+      position: relative;
+    }
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      background: var(--gradient-brand);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--gradient-brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-glow);
+    }
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+      border: 1px solid var(--surface-border);
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--gradient-brand);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-glow);
+      margin-top: 10px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -6px rgba(139, 92, 246, 0.5);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--surface-border);
+    }
+
+    /* Quick Demo Logins */
+    .quick-logins {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quick-btn {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover {
+      border-color: var(--primary);
+      background: rgba(139, 92, 246, 0.1);
+      transform: translateX(4px);
+    }
+    .quick-btn-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+
+    .cloud-status {
+      margin-top: 24px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-size: 12px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .back-home:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="auth-card">
+    <div class="brand-header">
+      <div class="brand-logo">🔐</div>
+      <h1 class="brand-title">Vault Platform</h1>
+      <p class="brand-subtitle">Distributed Object Storage & Health Telemetry</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</div>
+      <div class="auth-tab" id="tabSignUp" onclick="switchTab('signup')">Create Account</div>
+    </div>
+
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div class="form-group" id="nameGroup" style="display: none;">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="nameInput" placeholder="Dr. Alice Chen" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="emailInput" placeholder="admin@vault.io" required value="admin@vault.io" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Access Token / Password</label>
+        <input type="password" class="form-input" id="passwordInput" placeholder="••••••••••••" required value="vault-cluster-2026" />
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submitBtn">
+        <span>🚀 Sign In to Cluster</span>
+      </button>
+    </form>
+
+    <div class="divider">OR USE 1-CLICK DEMO PROFILE</div>
+
+    <div class="quick-logins">
+      <button class="quick-btn" onclick="quickLogin('Admin Architect', 'admin@vault.io', 'Cluster Architect')">
+        <span>👑 Storage Architect</span>
+        <span class="quick-btn-badge">Full Access</span>
+      </button>
+      <button class="quick-btn" onclick="quickLogin('Chaos Engineer', 'chaos@vault.io', 'Chaos Specialist')">
+        <span>⚡ Chaos Engineer</span>
+        <span class="quick-btn-badge">Lab Access</span>
+      </button>
+      <button class="quick-btn" onclick="quickLogin('Dev Operator', 'demo@vault.io', 'Read / Write')">
+        <span>👨‍💻 Developer Operator</span>
+        <span class="quick-btn-badge">Standard</span>
+      </button>
+    </div>
+
+    <div class="cloud-status">
+      <span>⚡</span> Connected to Supabase Project: <strong>csrhmocmponregwceknr</strong>
+    </div>
+
+    <a href="index.html" class="back-home">← Return to Homepage</a>
+  </div>
+
+  <script>
+    let currentMode = 'signin';
+
+    function switchTab(mode) {
+      currentMode = mode;
+      document.getElementById('tabSignIn').classList.toggle('active', mode === 'signin');
+      document.getElementById('tabSignUp').classList.toggle('active', mode === 'signup');
+      document.getElementById('nameGroup').style.display = mode === 'signup' ? 'block' : 'none';
+      document.getElementById('submitBtn').innerHTML = mode === 'signin' ? '<span>🚀 Sign In to Cluster</span>' : '<span>✨ Create Operator Account</span>';
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value;
+      const name = currentMode === 'signup' ? document.getElementById('nameInput').value : email.split('@')[0];
+      loginUser(name || 'Cluster Operator', email, 'Storage Operator');
+    }
+
+    function quickLogin(name, email, role) {
+      loginUser(name, email, role);
+    }
+
+    function loginUser(name, email, role) {
+      const user = {
+        name: name,
+        email: email,
+        role: role,
+        avatar: name.charAt(0),
+        loggedInAt: new Date().toISOString()
+      };
+      localStorage.setItem('vault_user', JSON.stringify(user));
+      
+      const btn = document.getElementById('submitBtn');
+      btn.innerHTML = '<span>✅ Authenticated! Loading Cluster...</span>';
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    }
+  </script>
+</body>
+</html>

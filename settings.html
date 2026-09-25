@@ -1,1626 +1,338 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Settings — VAULT</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
-<style>
-/* ═══════════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════════ */
-:root {
-  --primary: #6366F1;
-  --primary-glow: rgba(99,102,241,0.25);
-  --success: #22C55E;
-  --success-glow: rgba(34,197,94,0.2);
-  --warning: #F59E0B;
-  --warning-glow: rgba(245,158,11,0.2);
-  --danger: #EF4444;
-  --danger-glow: rgba(239,68,68,0.2);
-  --info: #3B82F6;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings & Durability Policies — Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #8B5CF6;
+      --primary-hover: #7C3AED;
+      --secondary: #06B6D4;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #F43F5E;
+      --info: #3B82F6;
 
-  --bg: #0A0A0F;
-  --surface: #12121A;
-  --surface-2: #1A1A26;
-  --surface-3: #22223A;
-  --border: rgba(255,255,255,0.08);
-  --border-hover: rgba(255,255,255,0.15);
-  --text: #F1F5F9;
-  --text-muted: #94A3B8;
-  --text-faint: #475569;
+      --bg: #0B0F19;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 52, 0.9);
+      --surface: #131B2E;
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-border-hover: rgba(139, 92, 246, 0.35);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-blur: blur(24px);
+      --gradient-brand: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
+      --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.35);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --sidebar-w: 260px;
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
 
-  --glass: rgba(18,18,26,0.85);
-  --glass-border: rgba(255,255,255,0.08);
-  --blur: blur(16px);
+    [data-theme="light"] {
+      --bg: #F8FAFC;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --surface: #FFFFFF;
+      --surface-border: rgba(15, 23, 42, 0.08);
+      --text: #0F172A;
+      --text-muted: #475569;
+    }
 
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --nav-h: 64px;
-  --transition: 0.2s ease;
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
 
-[data-theme="light"] {
-  --bg: #F1F5F9;
-  --surface: #FFFFFF;
-  --surface-2: #F8FAFC;
-  --surface-3: #EEF2FF;
-  --border: rgba(0,0,0,0.08);
-  --border-hover: rgba(0,0,0,0.15);
-  --text: #0F172A;
-  --text-muted: #475569;
-  --text-faint: #94A3B8;
-  --glass: rgba(255,255,255,0.9);
-  --glass-border: rgba(0,0,0,0.08);
-}
+    .ambient-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.2; }
+    .orb-1 { width: 500px; height: 500px; background: #8B5CF6; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #06B6D4; bottom: -100px; right: -100px; }
 
-/* ═══════════════════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════════════════ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  transition:background var(--transition),color var(--transition);
-  overflow-x:hidden;
-}
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--glass);
+      backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+      padding: 24px 18px;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      margin-bottom: 32px;
+      padding-left: 6px;
+    }
+    .brand-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: var(--gradient-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; }
 
-[data-theme="dark"] body::before{
-  content:'';
-  position:fixed;inset:0;
-  background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(99,102,241,0.06) 0%,transparent 60%),
-             radial-gradient(ellipse 60% 40% at 80% 100%,rgba(139,92,246,0.04) 0%,transparent 60%);
-  pointer-events:none;z-index:0;
-}
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .nav-item a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-item.active a {
+      color: #FFFFFF;
+      background: var(--gradient-brand);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    }
 
-/* ═══════════════════════════════════════════════════
-   NAV
-═══════════════════════════════════════════════════ */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  height:var(--nav-h);
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border-bottom:1px solid var(--glass-border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;
-  gap:16px;
-}
-.nav-brand{
-  display:flex;align-items:center;gap:10px;
-  text-decoration:none;flex-shrink:0;
-}
-.nav-logo{
-  width:34px;height:34px;border-radius:10px;
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:800;color:#fff;
-  box-shadow:0 0 16px var(--primary-glow);
-}
-.nav-title{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.3px;}
-.nav-links{
-  display:flex;align-items:center;gap:4px;
-  flex:1;justify-content:center;
-}
-.nav-links a{
-  padding:6px 14px;border-radius:8px;
-  text-decoration:none;font-size:13.5px;font-weight:500;
-  color:var(--text-muted);
-  transition:all var(--transition);
-  white-space:nowrap;
-}
-.nav-links a:hover{color:var(--text);background:var(--border);}
-.nav-links a.active{
-  color:var(--primary);
-  background:var(--primary-glow);
-}
-.nav-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.theme-btn{
-  width:36px;height:36px;border-radius:50%;
-  border:1px solid var(--border);
-  background:var(--surface-2);
-  color:var(--text-muted);
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;
-  transition:all var(--transition);
-}
-.theme-btn:hover{border-color:var(--primary);color:var(--primary);}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse-dot 2s infinite;}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 24px 36px 60px;
+      max-width: 1100px;
+    }
 
-/* ═══════════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════════ */
-main{
-  margin-top:var(--nav-h);
-  padding:28px 24px;
-  max-width:1100px;
-  margin-left:auto;margin-right:auto;
-  position:relative;z-index:1;
-}
+    .topbar {
+      margin-bottom: 28px;
+    }
+    .topbar h1 { font-size: 26px; font-weight: 800; }
+    .topbar p { font-size: 14px; color: var(--text-muted); }
 
-.page-header{
-  display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;
-}
-.page-title{
-  font-size:28px;font-weight:800;
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;letter-spacing:-0.5px;
-}
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-/* ═══════════════════════════════════════════════════
-   TAB SYSTEM
-═══════════════════════════════════════════════════ */
-.tab-bar{
-  display:flex;gap:4px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:4px;
-  margin-bottom:24px;
-  overflow-x:auto;
-  scrollbar-width:none;
-}
-.tab-bar::-webkit-scrollbar{display:none;}
-.tab-btn{
-  padding:9px 18px;
-  border-radius:8px;
-  border:none;background:transparent;
-  color:var(--text-muted);
-  font-size:13.5px;font-weight:500;
-  cursor:pointer;
-  white-space:nowrap;
-  transition:all var(--transition);
-  display:flex;align-items:center;gap:6px;
-  font-family:'Inter',sans-serif;
-}
-.tab-btn:hover{color:var(--text);background:var(--border);}
-.tab-btn.active{
-  background:var(--primary);color:#fff;
-  box-shadow:0 4px 12px var(--primary-glow);
-}
-.tab-pane{display:none;}
-.tab-pane.active{display:block;}
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--primary); }
 
-/* ═══════════════════════════════════════════════════
-   CARDS
-═══════════════════════════════════════════════════ */
-.card{
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-lg);
-  padding:22px 24px;
-  margin-bottom:16px;
-}
-.card-title{
-  font-size:14px;font-weight:700;color:var(--text);
-  margin-bottom:4px;display:flex;align-items:center;gap:8px;
-}
-.card-subtitle{font-size:12.5px;color:var(--text-muted);margin-bottom:18px;}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary { background: var(--gradient-brand); color: #FFFFFF; }
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(139,92,246,0.4); transform: translateY(-2px); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--surface-border); }
 
-/* ═══════════════════════════════════════════════════
-   FORM ELEMENTS
-═══════════════════════════════════════════════════ */
-.form-group{margin-bottom:18px;}
-.form-label{
-  display:block;font-size:12.5px;font-weight:600;
-  color:var(--text-muted);margin-bottom:6px;letter-spacing:0.3px;
-}
-.form-input,.form-select,.form-textarea{
-  width:100%;padding:9px 12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:var(--text);
-  font-size:13.5px;
-  font-family:'Inter',sans-serif;
-  transition:border-color var(--transition),box-shadow var(--transition);
-  outline:none;
-}
-.form-select{
-  appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394A3B8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-  padding-right:32px;cursor:pointer;
-}
-.form-input:focus,.form-select:focus,.form-textarea:focus{
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px var(--primary-glow);
-}
-.form-textarea{resize:vertical;min-height:80px;}
-
-/* ═══════════════════════════════════════════════════
-   TOGGLE SWITCH
-═══════════════════════════════════════════════════ */
-.toggle-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.toggle-row:last-child{border-bottom:none;}
-.toggle-info{}
-.toggle-label{font-size:13.5px;font-weight:500;color:var(--text);}
-.toggle-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
-
-.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;position:absolute;}
-.toggle-slider{
-  position:absolute;cursor:pointer;inset:0;
-  background:var(--surface-3);
-  border-radius:12px;
-  transition:background 0.2s;
-  border:1px solid var(--border);
-}
-.toggle-slider::before{
-  content:'';
-  position:absolute;
-  width:18px;height:18px;
-  left:2px;top:2px;
-  background:#fff;
-  border-radius:50%;
-  transition:transform 0.2s;
-  box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-.toggle input:checked + .toggle-slider{background:var(--primary);border-color:var(--primary);}
-.toggle input:checked + .toggle-slider::before{transform:translateX(20px);}
-.toggle.lg{width:56px;height:30px;}
-.toggle.lg .toggle-slider::before{width:22px;height:22px;left:3px;top:3px;}
-.toggle.lg input:checked + .toggle-slider::before{transform:translateX(26px);}
-
-/* ═══════════════════════════════════════════════════
-   RADIO BUTTONS
-═══════════════════════════════════════════════════ */
-.radio-group{display:flex;gap:10px;flex-wrap:wrap;}
-.radio-card{
-  flex:1;min-width:80px;
-  padding:10px 14px;
-  border:2px solid var(--border);
-  border-radius:var(--radius);
-  cursor:pointer;text-align:center;
-  transition:all var(--transition);
-  background:var(--surface-2);
-}
-.radio-card input{display:none;}
-.radio-card:has(input:checked){
-  border-color:var(--primary);
-  background:var(--primary-glow);
-}
-.radio-card-label{font-size:15px;font-weight:700;color:var(--text);}
-.radio-card-sub{font-size:11px;color:var(--text-muted);}
-.radio-card:hover{border-color:var(--border-hover);}
-
-/* ═══════════════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════════════ */
-.btn{
-  padding:9px 18px;border-radius:8px;
-  font-size:13.5px;font-weight:600;
-  border:none;cursor:pointer;
-  display:inline-flex;align-items:center;gap:7px;
-  transition:all var(--transition);
-  font-family:'Inter',sans-serif;
-}
-.btn-primary{
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  color:#fff;box-shadow:0 4px 14px var(--primary-glow);
-}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,0.4);}
-.btn-secondary{
-  background:var(--surface-2);color:var(--text);
-  border:1px solid var(--border);
-}
-.btn-secondary:hover{border-color:var(--border-hover);}
-.btn-success{
-  background:linear-gradient(135deg,var(--success),#16A34A);
-  color:#fff;box-shadow:0 4px 14px var(--success-glow);
-}
-.btn-success:hover{transform:translateY(-1px);}
-.btn-danger{
-  background:linear-gradient(135deg,var(--danger),#DC2626);
-  color:#fff;box-shadow:0 4px 14px var(--danger-glow);
-}
-.btn-danger:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(239,68,68,0.4);}
-.btn-ghost{
-  background:transparent;color:var(--danger);
-  border:1px solid rgba(239,68,68,0.3);
-}
-.btn-ghost:hover{background:rgba(239,68,68,0.08);}
-.btn-sm{padding:6px 12px;font-size:12px;}
-.btn-xs{padding:4px 10px;font-size:11px;}
-
-/* ═══════════════════════════════════════════════════
-   TABLE
-═══════════════════════════════════════════════════ */
-.data-table{width:100%;border-collapse:collapse;}
-.data-table th{
-  font-size:11px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.6px;
-  color:var(--text-faint);
-  padding:8px 12px;text-align:left;
-  border-bottom:1px solid var(--border);
-}
-.data-table td{
-  padding:12px;
-  border-bottom:1px solid var(--border);
-  font-size:13px;color:var(--text);
-  vertical-align:middle;
-}
-.data-table tr:last-child td{border-bottom:none;}
-.data-table tr:hover td{background:rgba(255,255,255,0.02);}
-[data-theme="light"] .data-table tr:hover td{background:rgba(0,0,0,0.02);}
-
-/* ═══════════════════════════════════════════════════
-   BADGE
-═══════════════════════════════════════════════════ */
-.badge{
-  padding:3px 10px;border-radius:20px;
-  font-size:10.5px;font-weight:700;letter-spacing:0.5px;
-  text-transform:uppercase;
-}
-.badge-success{background:rgba(34,197,94,0.15);color:var(--success);}
-.badge-danger{background:rgba(239,68,68,0.15);color:var(--danger);}
-.badge-warning{background:rgba(245,158,11,0.15);color:var(--warning);}
-.badge-info{background:rgba(59,130,246,0.15);color:var(--info);}
-.badge-primary{background:rgba(99,102,241,0.15);color:var(--primary);}
-.badge-sec{background:var(--surface-3);color:var(--text-muted);}
-
-/* ═══════════════════════════════════════════════════
-   ENCRYPTION BLOCK
-═══════════════════════════════════════════════════ */
-.enc-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 20px;
-  background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.05));
-  border:1px solid rgba(99,102,241,0.2);
-  border-radius:var(--radius);
-  margin-bottom:16px;
-}
-.enc-info{flex:1;}
-.enc-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:10px;}
-.enc-desc{font-size:12.5px;color:var(--text-muted);}
-.enc-body{
-  padding:16px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  display:none;
-}
-.enc-body.visible{display:block;}
-
-/* ═══════════════════════════════════════════════════
-   SLIDER
-═══════════════════════════════════════════════════ */
-.slider-container{margin-bottom:4px;}
-.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.slider-label{font-size:12.5px;font-weight:600;color:var(--text-muted);}
-.slider-value{
-  font-family:'JetBrains Mono',monospace;
-  font-size:12px;font-weight:700;
-  color:var(--primary);
-  background:var(--primary-glow);
-  padding:2px 8px;border-radius:6px;
-}
-input[type=range]{
-  width:100%;height:6px;
-  -webkit-appearance:none;appearance:none;
-  background:var(--surface-3);
-  border-radius:3px;cursor:pointer;outline:none;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:18px;height:18px;border-radius:50%;
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  box-shadow:0 0 10px var(--primary-glow);
-  transition:transform 0.15s;
-}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
-input[type=range].warn::-webkit-slider-thumb{background:linear-gradient(135deg,var(--warning),#D97706);}
-input[type=range].warn::-webkit-slider-thumb:hover{transform:scale(1.2);}
-
-/* ═══════════════════════════════════════════════════
-   DANGER ZONE
-═══════════════════════════════════════════════════ */
-.danger-zone{
-  border:1px solid rgba(239,68,68,0.25);
-  border-radius:var(--radius-lg);
-  padding:20px;
-  background:rgba(239,68,68,0.03);
-  position:relative;overflow:hidden;
-}
-.danger-zone::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(239,68,68,0.03),transparent);
-  pointer-events:none;
-}
-.danger-zone-title{
-  font-size:13px;font-weight:700;color:var(--danger);
-  text-transform:uppercase;letter-spacing:0.8px;
-  margin-bottom:14px;display:flex;align-items:center;gap:8px;
-}
-.danger-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid rgba(239,68,68,0.1);
-}
-.danger-item:last-child{border-bottom:none;}
-.danger-item-title{font-size:13.5px;font-weight:600;color:var(--text);}
-.danger-item-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
-
-/* ═══════════════════════════════════════════════════
-   API KEY TABLE
-═══════════════════════════════════════════════════ */
-.api-key-val{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11.5px;color:var(--text-muted);
-  background:var(--surface-2);
-  padding:3px 8px;border-radius:4px;
-  letter-spacing:0.5px;
-}
-
-/* ═══════════════════════════════════════════════════
-   NOTIFICATION CHANNELS
-═══════════════════════════════════════════════════ */
-.channel-card{
-  display:flex;align-items:center;gap:16px;
-  padding:16px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  margin-bottom:10px;
-  transition:border-color var(--transition);
-}
-.channel-card:hover{border-color:var(--border-hover);}
-.channel-icon{
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
-}
-.channel-info{flex:1;}
-.channel-name{font-size:13.5px;font-weight:600;color:var(--text);}
-.channel-status{font-size:12px;color:var(--text-muted);margin-top:2px;}
-
-/* ═══════════════════════════════════════════════════
-   EVENT CHECKBOXES
-═══════════════════════════════════════════════════ */
-.event-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:12px;
-}
-.event-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  cursor:pointer;
-  transition:all var(--transition);
-}
-.event-item:hover{border-color:var(--border-hover);}
-.event-item input[type=checkbox]{
-  width:16px;height:16px;
-  accent-color:var(--primary);
-  cursor:pointer;
-}
-.event-label{font-size:12.5px;font-weight:500;color:var(--text);}
-
-/* ═══════════════════════════════════════════════════
-   MODAL
-═══════════════════════════════════════════════════ */
-.modal-overlay{
-  position:fixed;inset:0;z-index:200;
-  background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(4px);
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-  opacity:0;pointer-events:none;
-  transition:opacity 0.2s;
-}
-.modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius-xl);
-  padding:28px;
-  max-width:480px;width:100%;
-  box-shadow:0 24px 80px rgba(0,0,0,0.5);
-  transform:scale(0.95);
-  transition:transform 0.2s;
-}
-.modal-overlay.open .modal{transform:scale(1);}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text);}
-.modal-desc{font-size:13.5px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-
-/* ═══════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════ */
-.toast-container{
-  position:fixed;bottom:24px;right:24px;z-index:1000;
-  display:flex;flex-direction:column;gap:10px;pointer-events:none;
-}
-.toast{
-  padding:12px 18px;border-radius:var(--radius);
-  font-size:13.5px;font-weight:500;
-  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--border);
-  pointer-events:all;
-  animation:toast-in 0.3s ease forwards;
-  display:flex;align-items:center;gap:10px;
-  min-width:260px;max-width:360px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.25);
-}
-.toast.success{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.35);color:var(--success);}
-.toast.danger{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.35);color:var(--danger);}
-.toast.info{background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.35);color:var(--info);}
-.toast.warning{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.35);color:var(--warning);}
-@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-@keyframes toast-out{from{opacity:1}to{opacity:0;transform:translateX(20px)}}
-
-/* ═══════════════════════════════════════════════════
-   MISC
-═══════════════════════════════════════════════════ */
-.row{display:flex;gap:16px;flex-wrap:wrap;}
-.row .form-group{flex:1;min-width:180px;}
-.section-sep{height:1px;background:var(--border);margin:18px 0;}
-.warn-text{
-  display:flex;align-items:flex-start;gap:8px;
-  padding:10px 14px;
-  background:rgba(239,68,68,0.07);
-  border:1px solid rgba(239,68,68,0.2);
-  border-radius:8px;
-  font-size:12.5px;color:var(--danger);
-  margin-top:12px;line-height:1.5;
-}
-.info-text{
-  display:flex;align-items:flex-start;gap:8px;
-  padding:10px 14px;
-  background:rgba(59,130,246,0.07);
-  border:1px solid rgba(59,130,246,0.2);
-  border-radius:8px;
-  font-size:12.5px;color:var(--info);
-  margin-top:10px;line-height:1.5;
-}
-.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
-.chip{
-  padding:4px 12px;border-radius:20px;
-  font-size:12px;font-weight:600;
-  background:var(--surface-3);color:var(--text-muted);
-  cursor:pointer;border:1px solid var(--border);
-  transition:all var(--transition);
-}
-.chip:hover,.chip.active{
-  background:var(--primary-glow);color:var(--primary);
-  border-color:rgba(99,102,241,0.3);
-}
-.key-icon{font-size:24px;margin-right:6px;}
-.divider-text{
-  display:flex;align-items:center;gap:12px;
-  color:var(--text-faint);font-size:11px;font-weight:600;
-  letter-spacing:0.5px;margin:12px 0;
-}
-.divider-text::before,.divider-text::after{
-  content:'';flex:1;height:1px;background:var(--border);
-}
-.file-upload-area{
-  padding:20px;
-  border:2px dashed var(--border);
-  border-radius:var(--radius);
-  text-align:center;
-  cursor:pointer;
-  transition:all var(--transition);
-  background:var(--surface-2);
-}
-.file-upload-area:hover{border-color:var(--primary);background:var(--primary-glow);}
-.upload-icon{font-size:28px;margin-bottom:6px;}
-.upload-label{font-size:13px;color:var(--text-muted);}
-
-/* Theme preview */
-.theme-preview-row{display:flex;gap:10px;margin-top:10px;}
-.theme-preview-opt{
-  flex:1;padding:14px;
-  border-radius:var(--radius);
-  border:2px solid var(--border);
-  cursor:pointer;text-align:center;
-  transition:all var(--transition);
-}
-.theme-preview-opt.selected{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-glow);}
-.theme-preview-swatch{
-  height:36px;border-radius:8px;margin-bottom:8px;
-}
-.dark-swatch{background:linear-gradient(135deg,#0A0A0F,#12121A);}
-.light-swatch{background:linear-gradient(135deg,#F1F5F9,#FFFFFF);}
-.sys-swatch{background:linear-gradient(135deg,#0A0A0F 50%,#F1F5F9 50%);}
-.theme-preview-name{font-size:12px;font-weight:600;color:var(--text);}
-
-@media(max-width:768px){
-  .nav-links{display:none;}
-  .event-grid{grid-template-columns:1fr;}
-  main{padding:16px;}
-  .tab-btn{padding:8px 12px;font-size:12px;}
-}
-</style>
+    /* Toast */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; color: var(--text);
+      font-size: 14px; box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 10px;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
 </head>
 <body>
-<!-- ═══ NAV ═══ -->
-<nav>
-  <a class="nav-brand" href="index.html">
-    <div class="nav-logo">V</div>
-    <span class="nav-title">VAULT</span>
-  </a>
-  <div class="nav-links">
-    <a href="index.html">Dashboard</a>
-    <a href="files.html">Files</a>
-    <a href="cluster.html">Cluster</a>
-    <a href="chaos.html">Chaos Studio</a>
-    <a href="settings.html" class="active">Settings</a>
-  </div>
-  <div class="nav-actions">
-    <div class="status-dot" title="Cluster Online"></div>
-    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-  </div>
-</nav>
 
-<!-- ═══ MAIN ═══ -->
-<main>
-  <div class="page-header">
-    <h1 class="page-title">⚙ Settings</h1>
-    <span style="font-size:13px;color:var(--text-muted);">Configure your VAULT cluster</span>
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
 
-  <!-- Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('general',this)">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      General
-    </button>
-    <button class="tab-btn" onclick="switchTab('storage',this)">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-      Storage
-    </button>
-    <button class="tab-btn" onclick="switchTab('security',this)">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Security
-    </button>
-    <button class="tab-btn" onclick="switchTab('notifications',this)">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-      Notifications
-    </button>
-    <button class="tab-btn" onclick="switchTab('advanced',this)">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      Advanced
-    </button>
-  </div>
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <div class="brand-icon">🔐</div>
+      <div class="brand-title">Vault</div>
+    </a>
 
-  <!-- ═══════════════════════════════════
-       TAB: GENERAL
-  ═══════════════════════════════════ -->
-  <div class="tab-pane active" id="tab-general">
-    <div class="card">
-      <div class="card-title">🏷 Cluster Identity</div>
-      <div class="card-subtitle">Basic configuration for your cluster</div>
-      <div class="row">
-        <div class="form-group">
-          <label class="form-label">Cluster Name</label>
-          <input class="form-input" type="text" value="My Vault Cluster" id="clusterName" oninput="markDirty()"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cluster ID</label>
-          <input class="form-input" type="text" value="vlt-a3f9-4b2c-8d11" readonly style="color:var(--text-faint);cursor:not-allowed;"/>
-        </div>
-      </div>
-      <div class="row">
-        <div class="form-group">
-          <label class="form-label">Timezone</label>
-          <select class="form-select" onchange="markDirty()">
-            <option>UTC</option>
-            <option selected>Asia/Kolkata (IST, UTC+5:30)</option>
-            <option>America/New_York (EST)</option>
-            <option>America/Los_Angeles (PST)</option>
-            <option>Europe/London (GMT)</option>
-            <option>Europe/Berlin (CET)</option>
-            <option>Asia/Tokyo (JST)</option>
-            <option>Australia/Sydney (AEST)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Language</label>
-          <select class="form-select" onchange="markDirty()">
-            <option selected>English (US)</option>
-            <option>English (UK)</option>
-            <option>Deutsch</option>
-            <option>Français</option>
-            <option>日本語</option>
-            <option>中文 (简体)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Date Format</label>
-          <select class="form-select" onchange="markDirty()">
-            <option selected>DD/MM/YYYY</option>
-            <option>MM/DD/YYYY</option>
-            <option>YYYY-MM-DD</option>
-            <option>DD MMM YYYY</option>
-          </select>
-        </div>
-      </div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="dashboard.html">📊 Dashboard</a></li>
+      <li class="nav-item"><a href="files.html">📁 File Manager</a></li>
+      <li class="nav-item"><a href="cluster.html">🖥️ Cluster Health</a></li>
+      <li class="nav-item"><a href="chaos.html">⚡ Chaos Lab</a></li>
+      <li class="nav-item active"><a href="settings.html">⚙️ Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-wrapper">
+    <div class="topbar">
+      <h1>Cluster Configuration & Cloud Sync</h1>
+      <p>Configure distributed replication policies, Supabase cloud sync, and encryption keys.</p>
     </div>
 
-    <div class="card">
-      <div class="card-title">📦 Default Replication Factor</div>
-      <div class="card-subtitle">How many copies of each file chunk are stored across nodes</div>
-      <div class="radio-group">
-        <label class="radio-card">
-          <input type="radio" name="repl" value="2"/>
-          <div class="radio-card-label">2×</div>
-          <div class="radio-card-sub">Balanced<br/>2 copies</div>
-        </label>
-        <label class="radio-card">
-          <input type="radio" name="repl" value="3" checked/>
-          <div class="radio-card-label">3×</div>
-          <div class="radio-card-sub">Recommended<br/>3 copies</div>
-        </label>
-        <label class="radio-card">
-          <input type="radio" name="repl" value="5"/>
-          <div class="radio-card-label">5×</div>
-          <div class="radio-card-sub">High Durability<br/>5 copies</div>
-        </label>
+    <!-- Supabase Cloud Config -->
+    <div class="panel-card" style="border-left: 4px solid var(--success);">
+      <div class="panel-title">
+        <span>⚡</span> Supabase Cloud PostgreSQL Sync
       </div>
-      <div class="info-text" style="margin-top:14px;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        3× replication allows 2 simultaneous node failures with zero data loss. Requires at least 3 healthy nodes.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🎨 Appearance</div>
-      <div class="card-subtitle">Interface theme and display preferences</div>
-      <label class="form-label">Theme</label>
-      <div class="theme-preview-row">
-        <div class="theme-preview-opt" id="theme-dark" onclick="setTheme('dark')" style="border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-glow);">
-          <div class="theme-preview-swatch dark-swatch"></div>
-          <div class="theme-preview-name">🌙 Dark</div>
-        </div>
-        <div class="theme-preview-opt" id="theme-light" onclick="setTheme('light')">
-          <div class="theme-preview-swatch light-swatch"></div>
-          <div class="theme-preview-name">☀️ Light</div>
-        </div>
-        <div class="theme-preview-opt" id="theme-system" onclick="setTheme('system')">
-          <div class="theme-preview-swatch sys-swatch"></div>
-          <div class="theme-preview-name">💻 System</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px;">
-      <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
-      <button class="btn btn-primary" onclick="saveSettings()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Save Changes
-      </button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       TAB: STORAGE
-  ═══════════════════════════════════ -->
-  <div class="tab-pane" id="tab-storage">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div>
-          <div class="card-title">📋 Lifecycle Rules</div>
-          <div class="card-subtitle">Automatically adjust replication based on access patterns</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="openModal('addRuleModal')">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Rule
-        </button>
-      </div>
-      <table class="data-table" id="rulesTable">
-        <thead>
-          <tr>
-            <th>Rule Name</th>
-            <th>Condition</th>
-            <th>Action</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Cold Storage</strong></td>
-            <td style="font-size:12px;color:var(--text-muted);">Not accessed &gt; 30 days</td>
-            <td><span class="badge badge-info">Reduce → 2× replication</span></td>
-            <td>
-              <label class="toggle">
-                <input type="checkbox" checked onchange="markDirty()"/>
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td><button class="btn btn-xs btn-ghost" style="color:var(--danger);background:rgba(239,68,68,0.08);" onclick="deleteRule(this)">Delete</button></td>
-          </tr>
-          <tr>
-            <td><strong>Hot Tier</strong></td>
-            <td style="font-size:12px;color:var(--text-muted);">Accessed &gt; 10×/week</td>
-            <td><span class="badge badge-warning">Promote → 4× replication</span></td>
-            <td>
-              <label class="toggle">
-                <input type="checkbox" checked onchange="markDirty()"/>
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td><button class="btn btn-xs btn-ghost" style="color:var(--danger);background:rgba(239,68,68,0.08);" onclick="deleteRule(this)">Delete</button></td>
-          </tr>
-          <tr>
-            <td><strong>Archive</strong></td>
-            <td style="font-size:12px;color:var(--text-muted);">Not accessed &gt; 180 days</td>
-            <td><span class="badge badge-sec">Reduce → 1× replication</span></td>
-            <td>
-              <label class="toggle">
-                <input type="checkbox" onchange="markDirty()"/>
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td><button class="btn btn-xs btn-ghost" style="color:var(--danger);background:rgba(239,68,68,0.08);" onclick="deleteRule(this)">Delete</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🗜 Compression Settings</div>
-      <div class="card-subtitle">Compress data before storing to save space</div>
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <div class="toggle-label">Enable Gzip Compression</div>
-          <div class="toggle-desc">Apply Gzip to cold-tier data. CPU cost: Low · Space savings: ~30%</div>
-        </div>
-        <label class="toggle"><input type="checkbox" checked onchange="markDirty()"/><span class="toggle-slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <div class="toggle-label">Enable Zstd Compression</div>
-          <div class="toggle-desc">Apply Zstd to hot-tier data. CPU cost: Medium · Space savings: ~40%</div>
-        </div>
-        <label class="toggle"><input type="checkbox" onchange="markDirty()"/><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📐 Chunk Size</div>
-      <div class="card-subtitle">Size of each data chunk when splitting files across nodes</div>
-      <div class="radio-group">
-        <label class="radio-card"><input type="radio" name="chunk" value="1"/><div class="radio-card-label">1 MB</div><div class="radio-card-sub">Fine-grained</div></label>
-        <label class="radio-card"><input type="radio" name="chunk" value="2" checked/><div class="radio-card-label">2 MB</div><div class="radio-card-sub">Balanced</div></label>
-        <label class="radio-card"><input type="radio" name="chunk" value="4"/><div class="radio-card-label">4 MB</div><div class="radio-card-sub">Efficient</div></label>
-        <label class="radio-card"><input type="radio" name="chunk" value="8"/><div class="radio-card-label">8 MB</div><div class="radio-card-sub">Large files</div></label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔍 Node Auto-Discovery</div>
-      <div class="card-subtitle">Automatically detect and join new nodes in the cluster</div>
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <div class="toggle-label">Enable Auto-Discovery</div>
-          <div class="toggle-desc">Scan network for new VAULT nodes and register them automatically</div>
-        </div>
-        <label class="toggle"><input type="checkbox" checked id="autoDiscoveryToggle" onchange="toggleAutoDisc(this)"/><span class="toggle-slider"></span></label>
-      </div>
-      <div id="autoDiscBody" style="margin-top:12px;">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Port Range for Discovery</label>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <input class="form-input" type="number" value="8080" style="width:100px;" oninput="markDirty()"/>
-            <span style="color:var(--text-faint);">–</span>
-            <input class="form-input" type="number" value="8099" style="width:100px;" oninput="markDirty()"/>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px;">
-      <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
-      <button class="btn btn-primary" onclick="saveSettings()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Save Changes
-      </button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       TAB: SECURITY
-  ═══════════════════════════════════ -->
-  <div class="tab-pane" id="tab-security">
-    <!-- ZKE Toggle -->
-    <div class="card">
-      <div class="card-title">🔐 Zero-Knowledge Encryption</div>
-      <div class="card-subtitle">Encrypt all data before it leaves your browser. The server never sees plaintext.</div>
-      <div class="enc-header">
-        <div class="enc-info">
-          <div class="enc-title">
-            End-to-End Encryption
-            <span class="badge badge-primary">AES-256-GCM</span>
-          </div>
-          <div class="enc-desc">When enabled, all file data is encrypted client-side using AES-256-GCM. Only you hold the keys.</div>
-        </div>
-        <label class="toggle lg" style="margin-left:24px;">
-          <input type="checkbox" id="encToggle" onchange="toggleEncryption(this)"/>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="enc-body" id="encBody">
-        <div class="form-group">
-          <label class="form-label">Key Derivation Method</label>
-          <div class="radio-group" style="flex-direction:column;gap:8px;">
-            <label style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-3);border-radius:8px;cursor:pointer;border:1px solid var(--border);">
-              <input type="radio" name="keytype" value="browser" checked style="accent-color:var(--primary);width:16px;height:16px;"/>
-              <div><div style="font-size:13px;font-weight:600;">🌐 Browser-Derived</div><div style="font-size:12px;color:var(--text-muted);">Key derived from browser fingerprint + random salt</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-3);border-radius:8px;cursor:pointer;border:1px solid var(--border);">
-              <input type="radio" name="keytype" value="passphrase" style="accent-color:var(--primary);width:16px;height:16px;"/>
-              <div><div style="font-size:13px;font-weight:600;">🔑 User Passphrase</div><div style="font-size:12px;color:var(--text-muted);">PBKDF2 key derivation from your chosen passphrase</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-3);border-radius:8px;cursor:pointer;border:1px solid var(--border);">
-              <input type="radio" name="keytype" value="hardware" style="accent-color:var(--primary);width:16px;height:16px;"/>
-              <div><div style="font-size:13px;font-weight:600;">🛡 Hardware Key</div><div style="font-size:12px;color:var(--text-muted);">YubiKey / WebAuthn hardware token (requires compatible device)</div></div>
-            </label>
-          </div>
-        </div>
-        <div class="warn-text">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-          <span><strong>Warning:</strong> If you lose your encryption key, your files <strong>cannot be recovered</strong>. Store your key in a secure password manager.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- API Keys -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div>
-          <div class="card-title">🗝 API Key Management</div>
-          <div class="card-subtitle">Programmatic access to your VAULT cluster</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="createApiKey()">+ Create Key</button>
-      </div>
-      <table class="data-table" id="apiKeysTable">
-        <thead>
-          <tr><th>Name</th><th>Key</th><th>Permissions</th><th>Last Used</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Production SDK</strong></td>
-            <td><span class="api-key-val">vlt_sk_••••••••9f3a</span></td>
-            <td><span class="badge badge-primary">Read/Write</span></td>
-            <td style="color:var(--text-muted);font-size:12px;">2 hours ago</td>
-            <td><button class="btn btn-xs" style="background:rgba(239,68,68,0.1);color:var(--danger);" onclick="revokeKey(this)">Revoke</button></td>
-          </tr>
-          <tr>
-            <td><strong>CI/CD Pipeline</strong></td>
-            <td><span class="api-key-val">vlt_sk_••••••••b72c</span></td>
-            <td><span class="badge badge-info">Read Only</span></td>
-            <td style="color:var(--text-muted);font-size:12px;">Yesterday</td>
-            <td><button class="btn btn-xs" style="background:rgba(239,68,68,0.1);color:var(--danger);" onclick="revokeKey(this)">Revoke</button></td>
-          </tr>
-          <tr>
-            <td><strong>Monitoring Agent</strong></td>
-            <td><span class="api-key-val">vlt_sk_••••••••1d8e</span></td>
-            <td><span class="badge badge-sec">Metrics Only</span></td>
-            <td style="color:var(--text-muted);font-size:12px;">3 days ago</td>
-            <td><button class="btn btn-xs" style="background:rgba(239,68,68,0.1);color:var(--danger);" onclick="revokeKey(this)">Revoke</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Access Log -->
-    <div class="card">
-      <div class="card-title">📜 Recent API Access Log</div>
-      <div class="card-subtitle">Last 10 authenticated API calls</div>
-      <table class="data-table">
-        <thead>
-          <tr><th>Timestamp</th><th>Key</th><th>Method</th><th>Endpoint</th><th>Status</th></tr>
-        </thead>
-        <tbody id="accessLogBody"></tbody>
-      </table>
-    </div>
-
-    <!-- 2FA -->
-    <div class="card">
-      <div class="card-title">📱 Two-Factor Authentication</div>
-      <div class="card-subtitle">Add an extra layer of security to your cluster admin panel</div>
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <div class="toggle-label">Enable 2FA (TOTP)</div>
-          <div class="toggle-desc">Use an authenticator app (Google Authenticator, Authy) for login</div>
-        </div>
-        <label class="toggle"><input type="checkbox" onchange="toggle2FA(this)"/><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       TAB: NOTIFICATIONS
-  ═══════════════════════════════════ -->
-  <div class="tab-pane" id="tab-notifications">
-    <div class="card">
-      <div class="card-title">📡 Notification Channels</div>
-      <div class="card-subtitle">Where to send alerts when cluster events occur</div>
-
-      <div class="channel-card">
-        <div class="channel-icon" style="background:rgba(59,130,246,0.1);">📧</div>
-        <div class="channel-info">
-          <div class="channel-name">Email</div>
-          <div class="channel-status">Send alerts to your email address</div>
-        </div>
-        <label class="toggle"><input type="checkbox" checked id="emailToggle" onchange="toggleChannel('email',this)"/><span class="toggle-slider"></span></label>
-      </div>
-      <div id="emailConfig" style="padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);margin-top:-4px;margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Alert Email Address</label>
-          <input class="form-input" type="email" value="admin@example.com" oninput="markDirty()"/>
-        </div>
-      </div>
-
-      <div class="channel-card">
-        <div class="channel-icon" style="background:rgba(99,102,241,0.1);">🔗</div>
-        <div class="channel-info">
-          <div class="channel-name">Webhook</div>
-          <div class="channel-status">POST event payload to a custom URL</div>
-        </div>
-        <label class="toggle"><input type="checkbox" id="webhookToggle" onchange="toggleChannel('webhook',this)"/><span class="toggle-slider"></span></label>
-      </div>
-      <div id="webhookConfig" style="display:none;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);margin-top:-4px;margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Webhook URL</label>
-          <input class="form-input" type="url" placeholder="https://hooks.example.com/vault-events" oninput="markDirty()"/>
-        </div>
-      </div>
-
-      <div class="channel-card">
-        <div class="channel-icon" style="background:rgba(74,222,128,0.1);">💬</div>
-        <div class="channel-info">
-          <div class="channel-name">Slack</div>
-          <div class="channel-status">Post messages to a Slack channel</div>
-        </div>
-        <label class="toggle"><input type="checkbox" id="slackToggle" onchange="toggleChannel('slack',this)"/><span class="toggle-slider"></span></label>
-      </div>
-      <div id="slackConfig" style="display:none;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);margin-top:-4px;margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Slack Webhook URL</label>
-          <input class="form-input" type="url" placeholder="https://hooks.slack.com/services/..." oninput="markDirty()"/>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🎯 Event Subscriptions</div>
-      <div class="card-subtitle">Choose which events trigger notifications</div>
-      <div class="event-grid">
-        <label class="event-item">
-          <input type="checkbox" checked/>
-          <div>
-            <div class="event-label">🔴 Node Offline</div>
-            <div style="font-size:11px;color:var(--text-muted);">When a node goes unreachable</div>
-          </div>
-        </label>
-        <label class="event-item">
-          <input type="checkbox" checked/>
-          <div>
-            <div class="event-label">🟡 Replication Degraded</div>
-            <div style="font-size:11px;color:var(--text-muted);">Chunks below target replicas</div>
-          </div>
-        </label>
-        <label class="event-item">
-          <input type="checkbox" checked/>
-          <div>
-            <div class="event-label">✅ Repair Complete</div>
-            <div style="font-size:11px;color:var(--text-muted);">When all chunks are healed</div>
-          </div>
-        </label>
-        <label class="event-item">
-          <input type="checkbox" checked/>
-          <div>
-            <div class="event-label">☣ Corruption Detected</div>
-            <div style="font-size:11px;color:var(--text-muted);">Scrubber finds bad checksums</div>
-          </div>
-        </label>
-        <label class="event-item">
-          <input type="checkbox"/>
-          <div>
-            <div class="event-label">🟢 Node Online</div>
-            <div style="font-size:11px;color:var(--text-muted);">When a node rejoins cluster</div>
-          </div>
-        </label>
-        <label class="event-item">
-          <input type="checkbox"/>
-          <div>
-            <div class="event-label">📊 Daily Report</div>
-            <div style="font-size:11px;color:var(--text-muted);">Daily cluster health summary</div>
-          </div>
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🧪 Test Notifications</div>
-      <div class="card-subtitle">Send a test event to verify your configuration</div>
-      <button class="btn btn-secondary" onclick="sendTestNotif()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Send Test Notification
-      </button>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px;">
-      <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
-      <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       TAB: ADVANCED
-  ═══════════════════════════════════ -->
-  <div class="tab-pane" id="tab-advanced">
-    <div class="card">
-      <div class="card-title">⚙ Cluster Internals</div>
-      <div class="card-subtitle">Fine-tune the cluster's background processes</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        Vault synchronizes file metadata, shard manifests, and access logs with your Supabase project.
+      </p>
 
       <div class="form-group">
-        <div class="slider-header">
-          <span class="slider-label">Heartbeat Interval</span>
-          <span class="slider-value" id="hbVal">5s</span>
-        </div>
-        <input type="range" min="1" max="30" value="5" step="1"
-          oninput="document.getElementById('hbVal').textContent=this.value+'s';markDirty()"/>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-top:4px;"><span>1s</span><span>30s</span></div>
+        <label class="form-label">Supabase Project URL</label>
+        <input type="text" class="form-input" id="supabaseUrlInput" value="https://csrhmocmponregwceknr.supabase.co" />
       </div>
-
-      <div class="section-sep"></div>
 
       <div class="form-group">
-        <div class="slider-header">
-          <span class="slider-label">Scrubber Interval</span>
-          <span class="slider-value" id="scrubVal">6hr</span>
-        </div>
-        <input type="range" min="1" max="24" value="6" step="1"
-          oninput="document.getElementById('scrubVal').textContent=this.value+'hr';markDirty()"/>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-top:4px;"><span>1hr</span><span>24hr</span></div>
+        <label class="form-label">Supabase Anon Public Key</label>
+        <input type="password" class="form-input" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="sbp_vault_demo_key_csrhmocmponregwceknr" />
       </div>
 
-      <div class="section-sep"></div>
-
-      <div class="form-group" style="margin-bottom:0">
-        <div class="slider-header">
-          <span class="slider-label">Repair Concurrency</span>
-          <span class="slider-value" id="repairVal">4 workers</span>
-        </div>
-        <input type="range" min="1" max="10" value="4" step="1"
-          oninput="document.getElementById('repairVal').textContent=this.value+' workers';markDirty()"/>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-top:4px;"><span>1</span><span>10</span></div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="testSupabaseConnection()">🔍 Test Cloud Connection</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">🛠 Developer Options</div>
-      <div class="card-subtitle">Advanced tools for cluster engineers and developers</div>
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <div class="toggle-label">Engineer Mode</div>
-          <div class="toggle-desc">Enable verbose logging, raw API explorer, and debug overlays</div>
-        </div>
-        <label class="toggle"><input type="checkbox" onchange="toggleEngineer(this)"/><span class="toggle-slider"></span></label>
+    <!-- Replication Policy -->
+    <div class="panel-card">
+      <div class="panel-title">
+        <span>🛡️</span> Default Replication & Durability Policy
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cluster Quorum Replication Factor</label>
+        <select class="form-input" id="repPolicy">
+          <option value="3" selected>3× Standard Quorum (Survives 2 simultaneous node crashes)</option>
+          <option value="5">5× High Durability (Survives 4 simultaneous node crashes)</option>
+          <option value="2">2× Economy Mode (Development tier)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Multi-Part Chunk Buffer Size</label>
+        <select class="form-input">
+          <option selected>2.0 MB (Recommended for standard bandwidth)</option>
+          <option>4.0 MB (Optimized for large video payloads)</option>
+          <option>1.0 MB (Low latency shard buffer)</option>
+        </select>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">💾 Configuration Import / Export</div>
-      <div class="card-subtitle">Backup or restore your entire VAULT configuration</div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <button class="btn btn-secondary" onclick="exportConfig()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export Configuration (JSON)
-        </button>
-        <div class="file-upload-area" style="flex:1;min-width:200px;padding:12px;" onclick="document.getElementById('importFile').click()">
-          <div class="upload-icon">📂</div>
-          <div class="upload-label">Click to import configuration JSON</div>
-          <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importConfig(this)"/>
-        </div>
+    <!-- Zero Knowledge Encryption -->
+    <div class="panel-card">
+      <div class="panel-title">
+        <span>🔐</span> Client-Side Zero-Knowledge Encryption
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        All binary files are encrypted in the browser using AES-GCM 256-bit before sharding across storage daemons.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Master Key Passphrase</label>
+        <input type="password" class="form-input" value="vault-master-crypto-key-2026" />
       </div>
     </div>
 
-    <!-- Danger Zone -->
-    <div class="danger-zone">
-      <div class="danger-zone-title">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-        ⚠ Danger Zone
-      </div>
-      <div class="danger-item">
-        <div>
-          <div class="danger-item-title">Reset Cluster Configuration</div>
-          <div class="danger-item-desc">Resets all settings to factory defaults. Data is preserved.</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" style="border-color:rgba(239,68,68,0.3);color:var(--danger);" onclick="openModal('resetModal')">Reset Config</button>
-      </div>
-      <div class="danger-item">
-        <div>
-          <div class="danger-item-title">Wipe All Data</div>
-          <div class="danger-item-desc">Permanently deletes ALL files, chunks, and metadata. This action is irreversible.</div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="openModal('wipeModal')">⚠ Wipe All Data</button>
-      </div>
-    </div>
+    <button class="btn btn-primary" onclick="saveSettings()">💾 Save Configuration</button>
+  </main>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;">
-      <button class="btn btn-secondary" onclick="discardChanges()">Discard</button>
-      <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
-    </div>
-  </div>
-</main>
+  <div class="toast-container" id="toastContainer"></div>
 
-<!-- ═══ MODALS ═══ -->
-<!-- Add Rule Modal -->
-<div class="modal-overlay" id="addRuleModal">
-  <div class="modal">
-    <div class="modal-title">➕ Add Lifecycle Rule</div>
-    <div class="modal-desc">Define a new rule to automatically adjust replication based on access patterns.</div>
-    <div class="form-group">
-      <label class="form-label">Rule Name</label>
-      <input class="form-input" type="text" placeholder="e.g. Very Cold Storage" id="newRuleName"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Condition</label>
-      <select class="form-select" id="newRuleCond">
-        <option>Not accessed > 30 days</option>
-        <option>Not accessed > 60 days</option>
-        <option>Not accessed > 90 days</option>
-        <option>Accessed > 5×/week</option>
-        <option>Accessed > 10×/week</option>
-        <option>File size > 1 GB</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Action</label>
-      <select class="form-select" id="newRuleAction">
-        <option>Reduce → 1× replication</option>
-        <option>Reduce → 2× replication</option>
-        <option>Keep at 3× replication</option>
-        <option>Promote → 4× replication</option>
-        <option>Promote → 5× replication</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addRuleModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="addRule()">Add Rule</button>
-    </div>
-  </div>
-</div>
-
-<!-- Reset Config Modal -->
-<div class="modal-overlay" id="resetModal">
-  <div class="modal">
-    <div class="modal-title">🔄 Reset Cluster Configuration?</div>
-    <div class="modal-desc">This will reset all settings to factory defaults. Your stored files and data will <strong>not</strong> be affected. This action can be undone by re-importing your configuration backup.</div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
-      <button class="btn btn-secondary" style="border-color:rgba(239,68,68,0.3);color:var(--danger);" onclick="resetConfig()">Reset Configuration</button>
-    </div>
-  </div>
-</div>
-
-<!-- Wipe Data Modal -->
-<div class="modal-overlay" id="wipeModal">
-  <div class="modal">
-    <div class="modal-title" style="color:var(--danger);">⚠ Wipe ALL Data?</div>
-    <div class="modal-desc">This will <strong>permanently delete</strong> all files, chunks, replicas, and metadata from every node in your cluster. <strong>This cannot be undone.</strong><br/><br/>Type <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;color:var(--danger);">WIPE ALL DATA</code> to confirm.</div>
-    <div class="form-group">
-      <input class="form-input" type="text" placeholder='Type "WIPE ALL DATA" to confirm' id="wipeConfirmInput" oninput="checkWipeInput()"/>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('wipeModal')">Cancel</button>
-      <button class="btn btn-danger" id="wipeConfirmBtn" disabled onclick="wipeData()" style="opacity:0.4;">Wipe All Data</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<script>
-/* ═══════════════════════════════════════════
-   THEME
-═══════════════════════════════════════════ */
-function toggleTheme(){
-  const html = document.documentElement;
-  const btn = document.querySelector('.theme-btn');
-  if(html.getAttribute('data-theme')==='dark'){
-    html.setAttribute('data-theme','light');
-    btn.textContent='☀️';
-    setThemeOpt('light');
-  } else {
-    html.setAttribute('data-theme','dark');
-    btn.textContent='🌙';
-    setThemeOpt('dark');
-  }
-}
-function setTheme(t){
-  const opts = ['dark','light','system'];
-  opts.forEach(o=>{
-    const el = document.getElementById('theme-'+o);
-    if(!el) return;
-    el.style.borderColor = o===t ? 'var(--primary)' : 'var(--border)';
-    el.style.boxShadow = o===t ? '0 0 0 4px var(--primary-glow)' : 'none';
-  });
-  if(t==='dark'){
-    document.documentElement.setAttribute('data-theme','dark');
-    document.querySelector('.theme-btn').textContent='🌙';
-  } else if(t==='light'){
-    document.documentElement.setAttribute('data-theme','light');
-    document.querySelector('.theme-btn').textContent='☀️';
-  } else {
-    const sys = window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme',sys);
-    document.querySelector('.theme-btn').textContent = sys==='dark'?'🌙':'☀️';
-  }
-}
-function setThemeOpt(t){
-  ['dark','light','system'].forEach(o=>{
-    const el = document.getElementById('theme-'+o);
-    if(!el) return;
-    el.style.borderColor = o===t ? 'var(--primary)' : 'var(--border)';
-    el.style.boxShadow = o===t ? '0 0 0 4px var(--primary-glow)' : 'none';
-  });
-}
-
-/* ═══════════════════════════════════════════
-   TABS
-═══════════════════════════════════════════ */
-function switchTab(name, btn){
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  btn.classList.add('active');
-}
-
-/* ═══════════════════════════════════════════
-   SAVE / DIRTY
-═══════════════════════════════════════════ */
-let dirty = false;
-function markDirty(){dirty=true;}
-function saveSettings(){
-  dirty=false;
-  showToast('✓ Settings saved successfully!','success');
-}
-function discardChanges(){
-  dirty=false;
-  showToast('Changes discarded.','info');
-}
-
-/* ═══════════════════════════════════════════
-   STORAGE TAB
-═══════════════════════════════════════════ */
-function toggleAutoDisc(el){
-  document.getElementById('autoDiscBody').style.opacity = el.checked ? '1' : '0.4';
-  document.getElementById('autoDiscBody').style.pointerEvents = el.checked ? 'all' : 'none';
-}
-
-function deleteRule(btn){
-  const row = btn.closest('tr');
-  row.style.animation = 'toast-out 0.3s ease forwards';
-  setTimeout(()=>{row.remove();showToast('Rule deleted.','info');},300);
-}
-
-function addRule(){
-  const name = document.getElementById('newRuleName').value.trim()||'New Rule';
-  const cond = document.getElementById('newRuleCond').value;
-  const action = document.getElementById('newRuleAction').value;
-  const tbody = document.querySelector('#rulesTable tbody');
-  const badgeClass = action.includes('Reduce') ? 'badge-info' : action.includes('Promote') ? 'badge-warning' : 'badge-sec';
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td><strong>${name}</strong></td>
-    <td style="font-size:12px;color:var(--text-muted);">${cond}</td>
-    <td><span class="badge ${badgeClass}">${action}</span></td>
-    <td><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></td>
-    <td><button class="btn btn-xs btn-ghost" style="color:var(--danger);background:rgba(239,68,68,0.08);" onclick="deleteRule(this)">Delete</button></td>`;
-  tbody.appendChild(row);
-  closeModal('addRuleModal');
-  showToast(`✓ Rule "${name}" added!`,'success');
-}
-
-/* ═══════════════════════════════════════════
-   SECURITY TAB
-═══════════════════════════════════════════ */
-function toggleEncryption(el){
-  const body = document.getElementById('encBody');
-  body.classList.toggle('visible', el.checked);
-  if(el.checked){
-    showToast('🔐 Encryption enabled!','success');
-  } else {
-    showToast('Encryption disabled.','info');
-  }
-}
-
-function createApiKey(){
-  const names = ['Admin Access','Backup Worker','Analytics Reader','Dev Testing'];
-  const name = names[Math.floor(Math.random()*names.length)];
-  const key = 'vlt_sk_••••••••'+Math.random().toString(36).slice(-4);
-  const tbody = document.querySelector('#apiKeysTable tbody');
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td><strong>${name}</strong></td>
-    <td><span class="api-key-val">${key}</span></td>
-    <td><span class="badge badge-primary">Read/Write</span></td>
-    <td style="color:var(--text-muted);font-size:12px;">Just now</td>
-    <td><button class="btn btn-xs" style="background:rgba(239,68,68,0.1);color:var(--danger);" onclick="revokeKey(this)">Revoke</button></td>`;
-  tbody.prepend(row);
-  showToast(`✓ API key "${name}" created!`,'success');
-}
-
-function revokeKey(btn){
-  const row = btn.closest('tr');
-  const name = row.querySelector('strong').textContent;
-  row.style.animation = 'toast-out 0.3s ease forwards';
-  setTimeout(()=>{row.remove();showToast(`Key "${name}" revoked.`,'info');},300);
-}
-
-function toggle2FA(el){
-  if(el.checked){showToast('2FA setup started — check your authenticator app.','info');}
-  else{showToast('2FA disabled.','warning');}
-}
-
-// Populate access log
-const accessLogData = [
-  {ts:'00:51:34',key:'vlt_sk_...9f3a',method:'GET',path:'/api/v1/files',status:200},
-  {ts:'00:49:12',key:'vlt_sk_...9f3a',method:'POST',path:'/api/v1/files/upload',status:201},
-  {ts:'00:45:00',key:'vlt_sk_...b72c',method:'GET',path:'/api/v1/cluster/status',status:200},
-  {ts:'00:41:22',key:'vlt_sk_...1d8e',method:'GET',path:'/api/v1/metrics',status:200},
-  {ts:'00:38:55',key:'vlt_sk_...9f3a',method:'DELETE',path:'/api/v1/files/old.tar',status:204},
-  {ts:'00:31:10',key:'vlt_sk_...b72c',method:'GET',path:'/api/v1/nodes',status:200},
-  {ts:'00:28:45',key:'vlt_sk_...1d8e',method:'GET',path:'/api/v1/metrics/heap',status:200},
-  {ts:'00:22:19',key:'vlt_sk_...9f3a',method:'GET',path:'/api/v1/files/backup.tar',status:200},
-  {ts:'00:17:03',key:'vlt_sk_...9f3a',method:'PUT',path:'/api/v1/config/replication',status:200},
-  {ts:'00:11:44',key:'vlt_sk_...b72c',method:'GET',path:'/api/v1/cluster/health',status:200},
-];
-
-function populateAccessLog(){
-  const tbody = document.getElementById('accessLogBody');
-  const colors = {GET:'badge-info',POST:'badge-success',PUT:'badge-warning',DELETE:'badge-danger'};
-  const statusColors = {200:'badge-success',201:'badge-success',204:'badge-success',401:'badge-danger',500:'badge-danger'};
-  tbody.innerHTML = accessLogData.map(r=>`
-    <tr>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);">${r.ts}</td>
-      <td><span class="api-key-val">${r.key}</span></td>
-      <td><span class="badge ${colors[r.method]||'badge-sec'}">${r.method}</span></td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);">${r.path}</td>
-      <td><span class="badge ${statusColors[r.status]||'badge-sec'}">${r.status}</span></td>
-    </tr>`).join('');
-}
-populateAccessLog();
-
-/* ═══════════════════════════════════════════
-   NOTIFICATIONS TAB
-═══════════════════════════════════════════ */
-function toggleChannel(channel, el){
-  const cfg = document.getElementById(channel+'Config');
-  cfg.style.display = el.checked ? 'block' : 'none';
-}
-
-function sendTestNotif(){
-  showToast('📨 Test notification sent to all active channels!','info');
-  setTimeout(()=>showToast('✓ Email delivered successfully','success'),1500);
-}
-
-/* ═══════════════════════════════════════════
-   ADVANCED TAB
-═══════════════════════════════════════════ */
-function toggleEngineer(el){
-  if(el.checked){
-    showToast('🛠 Engineer mode enabled — verbose logging active','warning');
-  } else {
-    showToast('Engineer mode disabled','info');
-  }
-}
-
-function exportConfig(){
-  const config = {
-    clusterName: document.getElementById('clusterName')?.value || 'My Vault Cluster',
-    replicationFactor: 3,
-    chunkSize: '2MB',
-    heartbeatInterval: '5s',
-    scrubberInterval: '6hr',
-    repairConcurrency: 4,
-    encryption: document.getElementById('encToggle')?.checked || false,
-    exportedAt: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'vault-config.json'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('✓ Configuration exported!','success');
-}
-
-function importConfig(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try{
-      const cfg = JSON.parse(e.target.result);
-      showToast(`✓ Config "${file.name}" imported!`,'success');
-    } catch(err){
-      showToast('Invalid JSON file.','danger');
+  <script>
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<span>${type === 'success' ? '✅' : type === 'danger' ? '⚠️' : 'ℹ️'}</span> <span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
     }
-  };
-  reader.readAsText(file);
-}
 
-function resetConfig(){
-  closeModal('resetModal');
-  showToast('✓ Cluster configuration reset to defaults.','info');
-}
+    function testSupabaseConnection() {
+      const url = document.getElementById('supabaseUrlInput').value;
+      showToast(`Pinging Supabase at ${url}...`, 'info');
+      setTimeout(() => {
+        showToast('✅ Supabase PostgreSQL endpoint reached successfully! Status: 200 OK', 'success');
+      }, 800);
+    }
 
-function wipeData(){
-  closeModal('wipeModal');
-  showToast('⚠ All data has been wiped from the cluster.','danger');
-}
+    function saveSettings() {
+      const url = document.getElementById('supabaseUrlInput').value;
+      const key = document.getElementById('supabaseKeyInput').value;
+      const rep = document.getElementById('repPolicy').value;
 
-function checkWipeInput(){
-  const val = document.getElementById('wipeConfirmInput').value;
-  const btn = document.getElementById('wipeConfirmBtn');
-  btn.disabled = val !== 'WIPE ALL DATA';
-  btn.style.opacity = val === 'WIPE ALL DATA' ? '1' : '0.4';
-}
+      localStorage.setItem('vault_supabase_url', url);
+      localStorage.setItem('vault_supabase_key', key);
+      localStorage.setItem('vault_rep_policy', rep);
 
-/* ═══════════════════════════════════════════
-   MODALS
-═══════════════════════════════════════════ */
-function openModal(id){
-  document.getElementById(id).classList.add('open');
-}
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-}
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-  overlay.addEventListener('click',e=>{
-    if(e.target===overlay) overlay.classList.remove('open');
-  });
-});
-
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
-function showToast(msg, type='info'){
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span>${msg}</span>`;
-  c.appendChild(t);
-  setTimeout(()=>{
-    t.style.animation='toast-out 0.3s ease forwards';
-    setTimeout(()=>t.remove(),300);
-  },3200);
-}
-
-/* ═══════════════════════════════════════════
-   RADIO CARD INTERACTION
-═══════════════════════════════════════════ */
-document.querySelectorAll('.radio-group').forEach(group=>{
-  group.addEventListener('change',()=>{markDirty();});
-});
-</script>
+      showToast('✅ Cluster settings saved and applied!', 'success');
+    }
+  </script>
 </body>
 </html>

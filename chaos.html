@@ -1,1436 +1,538 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chaos Studio — VAULT</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
-<style>
-/* ═══════════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════════ */
-:root {
-  --primary: #6366F1;
-  --primary-glow: rgba(99,102,241,0.25);
-  --success: #22C55E;
-  --success-glow: rgba(34,197,94,0.2);
-  --warning: #F59E0B;
-  --warning-glow: rgba(245,158,11,0.2);
-  --danger: #EF4444;
-  --danger-glow: rgba(239,68,68,0.2);
-  --info: #3B82F6;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chaos Engineering Studio — Vault Distributed Storage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #8B5CF6;
+      --primary-hover: #7C3AED;
+      --secondary: #06B6D4;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #F43F5E;
+      --info: #3B82F6;
 
-  --bg: #0A0A0F;
-  --surface: #12121A;
-  --surface-2: #1A1A26;
-  --surface-3: #22223A;
-  --border: rgba(255,255,255,0.08);
-  --border-hover: rgba(255,255,255,0.15);
-  --text: #F1F5F9;
-  --text-muted: #94A3B8;
-  --text-faint: #475569;
+      --bg: #0B0F19;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 52, 0.9);
+      --surface: #131B2E;
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-border-hover: rgba(244, 63, 94, 0.35);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-blur: blur(24px);
+      --gradient-brand: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
+      --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.35);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --sidebar-w: 260px;
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
 
-  --glass: rgba(18,18,26,0.8);
-  --glass-border: rgba(255,255,255,0.08);
-  --blur: blur(16px);
+    [data-theme="light"] {
+      --bg: #F8FAFC;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --surface: #FFFFFF;
+      --surface-border: rgba(15, 23, 42, 0.08);
+      --text: #0F172A;
+      --text-muted: #475569;
+    }
 
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
 
-  --nav-h: 64px;
-  --transition: 0.2s ease;
-}
+    .ambient-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.2; }
+    .orb-1 { width: 500px; height: 500px; background: #F43F5E; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #F59E0B; bottom: -100px; right: -100px; }
 
-[data-theme="light"] {
-  --bg: #F1F5F9;
-  --surface: #FFFFFF;
-  --surface-2: #F8FAFC;
-  --surface-3: #EEF2FF;
-  --border: rgba(0,0,0,0.08);
-  --border-hover: rgba(0,0,0,0.15);
-  --text: #0F172A;
-  --text-muted: #475569;
-  --text-faint: #94A3B8;
-  --glass: rgba(255,255,255,0.85);
-  --glass-border: rgba(0,0,0,0.1);
-}
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--glass);
+      backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+      padding: 24px 18px;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      margin-bottom: 32px;
+      padding-left: 6px;
+    }
+    .brand-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: var(--gradient-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; }
 
-/* ═══════════════════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════════════════ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  transition:background var(--transition),color var(--transition);
-  overflow-x:hidden;
-}
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .nav-item a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-item.active a {
+      color: #FFFFFF;
+      background: var(--gradient-brand);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    }
 
-[data-theme="dark"] body::before{
-  content:'';
-  position:fixed;inset:0;
-  background:radial-gradient(ellipse 80% 50% at 10% 0%,rgba(99,102,241,0.07) 0%,transparent 60%),
-             radial-gradient(ellipse 60% 40% at 90% 100%,rgba(239,68,68,0.05) 0%,transparent 60%);
-  pointer-events:none;z-index:0;
-}
+    /* Main Content */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 24px 36px 60px;
+      max-width: 1500px;
+    }
 
-/* ═══════════════════════════════════════════════════
-   NAV
-═══════════════════════════════════════════════════ */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  height:var(--nav-h);
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border-bottom:1px solid var(--glass-border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;
-  gap:16px;
-}
-.nav-brand{
-  display:flex;align-items:center;gap:10px;
-  text-decoration:none;
-  flex-shrink:0;
-}
-.nav-logo{
-  width:34px;height:34px;border-radius:10px;
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:800;color:#fff;
-  box-shadow:0 0 16px var(--primary-glow);
-}
-.nav-title{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.3px;}
-.nav-links{
-  display:flex;align-items:center;gap:4px;
-  flex:1;justify-content:center;
-}
-.nav-links a{
-  padding:6px 14px;border-radius:8px;
-  text-decoration:none;font-size:13.5px;font-weight:500;
-  color:var(--text-muted);
-  transition:all var(--transition);
-  white-space:nowrap;
-}
-.nav-links a:hover{color:var(--text);background:var(--border);}
-.nav-links a.active{
-  color:var(--primary);
-  background:var(--primary-glow);
-}
-.nav-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .chaos-banner {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(245, 158, 11, 0.12) 100%);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .chaos-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: var(--danger);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-/* theme toggle */
-.theme-btn{
-  width:36px;height:36px;border-radius:50%;
-  border:1px solid var(--border);
-  background:var(--surface-2);
-  color:var(--text-muted);
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;
-  transition:all var(--transition);
-}
-.theme-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary { background: var(--gradient-brand); color: #FFFFFF; }
+    .btn-danger { background: var(--danger); color: #FFFFFF; }
+    .btn-danger:hover { box-shadow: 0 8px 24px rgba(244,63,94,0.4); }
+    .btn-secondary { background: var(--bg-card); color: var(--text); border-color: var(--surface-border); }
+    .btn-secondary:hover { background: var(--bg-card-hover); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 
-/* status dot */
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse-dot 2s infinite;}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+    /* 2-Column Chaos Grid */
+    .chaos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 1080px) { .chaos-grid { grid-template-columns: 1fr; } }
 
-/* ═══════════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════════ */
-main{
-  margin-top:var(--nav-h);
-  padding:28px 24px;
-  max-width:1500px;
-  margin-left:auto;margin-right:auto;
-  position:relative;z-index:1;
-}
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .panel-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
-/* Page header */
-.page-header{
-  display:flex;align-items:center;gap:16px;
-  margin-bottom:20px;flex-wrap:wrap;
-}
-.page-title{
-  font-size:28px;font-weight:800;
-  background:linear-gradient(135deg,var(--danger),var(--warning));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-  letter-spacing:-0.5px;
-}
-.badge{
-  padding:4px 12px;border-radius:20px;
-  font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;
-}
-.badge-sim{
-  background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(245,158,11,0.2));
-  border:1px solid rgba(239,68,68,0.3);
-  color:var(--warning);
-  animation:badge-glow 2s ease-in-out infinite alternate;
-}
-@keyframes badge-glow{
-  from{box-shadow:0 0 8px rgba(239,68,68,0.3);}
-  to{box-shadow:0 0 16px rgba(245,158,11,0.4);}
-}
+    /* Node Control Cards */
+    .node-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+    }
+    .node-row-info { display: flex; align-items: center; gap: 12px; }
+    .node-status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); }
+    .node-status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 
-/* Warning banner */
-.warn-banner{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 18px;
-  background:rgba(245,158,11,0.08);
-  border:1px solid rgba(245,158,11,0.25);
-  border-radius:var(--radius);
-  margin-bottom:24px;
-  font-size:13.5px;color:var(--warning);
-  font-weight:500;
-}
-.warn-banner svg{flex-shrink:0;}
+    /* Scenario Buttons */
+    .scenario-card {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--surface-border);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scenario-card:hover {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.08);
+      transform: translateX(4px);
+    }
 
-/* Two-column layout */
-.chaos-grid{
-  display:grid;
-  grid-template-columns:420px 1fr;
-  gap:24px;
-  align-items:start;
-}
+    /* Healing Log Stream */
+    .log-stream {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      height: 480px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .log-entry {
+      display: flex;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .log-time { color: var(--text-dim); }
+    .log-msg.err { color: var(--danger); }
+    .log-msg.ok { color: var(--success); }
+    .log-msg.warn { color: var(--warning); }
+    .log-msg.info { color: var(--secondary); }
 
-/* Cards */
-.card{
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-lg);
-  padding:20px;
-  margin-bottom:16px;
-  position:relative;overflow:hidden;
-}
-.card::before{
-  content:'';position:absolute;inset:0;
-  border-radius:inherit;
-  background:linear-gradient(135deg,rgba(255,255,255,0.02),transparent);
-  pointer-events:none;
-}
-.card-title{
-  font-size:13px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.8px;
-  color:var(--text-muted);
-  margin-bottom:16px;
-  display:flex;align-items:center;gap:8px;
-}
-
-/* ═══════════════════════════════════════════════════
-   NODE LIST
-═══════════════════════════════════════════════════ */
-.node-list{display:flex;flex-direction:column;gap:8px;}
-.node-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  transition:all var(--transition);
-}
-.node-item:hover{border-color:var(--border-hover);}
-.node-item.killed{
-  background:rgba(239,68,68,0.05);
-  border-color:rgba(239,68,68,0.2);
-  opacity:0.85;
-}
-.node-item.latency{
-  background:rgba(245,158,11,0.05);
-  border-color:rgba(245,158,11,0.2);
-}
-.node-item.corrupted{
-  background:rgba(239,68,68,0.08);
-  border-color:rgba(239,68,68,0.3);
-}
-.node-name{
-  font-size:13px;font-weight:600;
-  font-family:'JetBrains Mono',monospace;
-  flex:1;min-width:0;
-}
-.node-zone{
-  font-size:10px;color:var(--text-faint);
-  font-family:'JetBrains Mono',monospace;
-}
-.status-badge{
-  padding:2px 8px;border-radius:20px;
-  font-size:10px;font-weight:700;letter-spacing:0.5px;
-  text-transform:uppercase;white-space:nowrap;
-}
-.status-online{background:rgba(34,197,94,0.15);color:var(--success);}
-.status-offline{background:rgba(239,68,68,0.15);color:var(--danger);}
-.status-latency{background:rgba(245,158,11,0.15);color:var(--warning);}
-.status-corrupted{background:rgba(239,68,68,0.2);color:var(--danger);}
-
-.node-actions{display:flex;gap:5px;}
-.btn-xs{
-  padding:4px 8px;border-radius:6px;
-  font-size:11px;font-weight:600;
-  border:none;cursor:pointer;
-  display:flex;align-items:center;gap:3px;
-  transition:all var(--transition);
-  white-space:nowrap;
-}
-.btn-kill{background:rgba(239,68,68,0.15);color:var(--danger);}
-.btn-kill:hover{background:rgba(239,68,68,0.3);}
-.btn-restore{background:rgba(34,197,94,0.15);color:var(--success);}
-.btn-restore:hover{background:rgba(34,197,94,0.3);}
-.btn-latency{background:rgba(245,158,11,0.15);color:var(--warning);}
-.btn-latency:hover{background:rgba(245,158,11,0.3);}
-
-/* ═══════════════════════════════════════════════════
-   INJECTOR SECTIONS
-═══════════════════════════════════════════════════ */
-.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.form-label{font-size:11.5px;font-weight:600;color:var(--text-muted);letter-spacing:0.3px;}
-.form-select,.form-input{
-  padding:8px 12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:var(--text);
-  font-size:13px;
-  font-family:'Inter',sans-serif;
-  width:100%;
-  transition:border-color var(--transition);
-  appearance:none;
-  -webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394A3B8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  padding-right:32px;
-}
-.form-select:focus,.form-input:focus{
-  outline:none;border-color:var(--primary);
-  box-shadow:0 0 0 3px var(--primary-glow);
-}
-.form-input{background-image:none;padding-right:12px;}
-
-.btn{
-  padding:9px 16px;border-radius:8px;
-  font-size:13px;font-weight:600;
-  border:none;cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;
-  transition:all var(--transition);
-  width:100%;justify-content:center;
-}
-.btn-danger{
-  background:linear-gradient(135deg,#EF4444,#DC2626);
-  color:#fff;
-  box-shadow:0 4px 16px rgba(239,68,68,0.3);
-}
-.btn-danger:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(239,68,68,0.45);}
-.btn-danger:active{transform:translateY(0);}
-.btn-warning{
-  background:linear-gradient(135deg,#F59E0B,#D97706);
-  color:#fff;
-  box-shadow:0 4px 16px rgba(245,158,11,0.3);
-}
-.btn-warning:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,0.45);}
-.btn-primary{
-  background:linear-gradient(135deg,var(--primary),#8B5CF6);
-  color:#fff;
-  box-shadow:0 4px 16px var(--primary-glow);
-}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,0.45);}
-
-.inject-result{
-  margin-top:10px;padding:10px 12px;
-  background:rgba(239,68,68,0.08);
-  border:1px solid rgba(239,68,68,0.2);
-  border-radius:8px;
-  font-size:12px;font-family:'JetBrains Mono',monospace;
-  color:var(--warning);
-  display:none;
-  line-height:1.6;
-}
-.inject-result.visible{display:block;}
-
-/* ═══════════════════════════════════════════════════
-   LATENCY SLIDER
-═══════════════════════════════════════════════════ */
-.slider-wrap{display:flex;flex-direction:column;gap:6px;}
-.slider-header{display:flex;justify-content:space-between;align-items:center;}
-.slider-val{
-  font-family:'JetBrains Mono',monospace;
-  font-size:12px;font-weight:700;
-  color:var(--warning);
-  background:rgba(245,158,11,0.1);
-  padding:2px 8px;border-radius:6px;
-}
-input[type=range]{
-  width:100%;height:6px;
-  -webkit-appearance:none;appearance:none;
-  background:var(--surface-3);
-  border-radius:3px;cursor:pointer;
-  outline:none;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:18px;height:18px;border-radius:50%;
-  background:linear-gradient(135deg,var(--warning),#D97706);
-  box-shadow:0 0 10px rgba(245,158,11,0.4);
-  transition:transform var(--transition);
-}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
-
-/* ═══════════════════════════════════════════════════
-   SCENARIO PRESETS
-═══════════════════════════════════════════════════ */
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.preset-card{
-  padding:12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  cursor:pointer;
-  transition:all var(--transition);
-  text-align:left;
-  position:relative;overflow:hidden;
-}
-.preset-card::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(239,68,68,0.0),rgba(239,68,68,0.05));
-  opacity:0;transition:opacity var(--transition);
-}
-.preset-card:hover{
-  border-color:rgba(239,68,68,0.3);
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(239,68,68,0.1);
-}
-.preset-card:hover::after{opacity:1;}
-.preset-icon{font-size:22px;margin-bottom:6px;display:block;}
-.preset-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
-.preset-desc{font-size:11px;color:var(--text-muted);line-height:1.4;}
-.preset-recovery{
-  margin-top:6px;font-size:10px;font-weight:600;
-  color:var(--info);
-  font-family:'JetBrains Mono',monospace;
-}
-.preset-card.running{
-  border-color:rgba(239,68,68,0.5);
-  animation:preset-pulse 1.5s ease-in-out infinite alternate;
-}
-@keyframes preset-pulse{
-  from{box-shadow:0 0 0 rgba(239,68,68,0.2);}
-  to{box-shadow:0 0 20px rgba(239,68,68,0.3);}
-}
-
-/* ═══════════════════════════════════════════════════
-   RIGHT COLUMN — TOPOLOGY
-═══════════════════════════════════════════════════ */
-.right-col{display:flex;flex-direction:column;gap:16px;}
-
-.topology-card{
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-lg);
-  padding:20px;
-  position:relative;overflow:hidden;
-}
-.topology-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;
-}
-.topology-title{
-  font-size:13px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.8px;
-  color:var(--text-muted);
-}
-.topology-stats{
-  display:flex;gap:12px;
-  font-size:11px;font-family:'JetBrains Mono',monospace;
-}
-.topo-stat{
-  display:flex;align-items:center;gap:5px;
-}
-.topo-dot{width:7px;height:7px;border-radius:50%;}
-
-canvas#topoCanvas{
-  width:100%;height:380px;
-  border-radius:10px;
-  display:block;
-  background:radial-gradient(ellipse at center,rgba(99,102,241,0.03),transparent 70%);
-  border:1px solid var(--border);
-}
-
-/* ═══════════════════════════════════════════════════
-   HEALING LOG
-═══════════════════════════════════════════════════ */
-.heal-card{
-  background:var(--glass);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius-lg);
-  padding:20px;
-}
-.heal-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:14px;
-}
-.heal-title{
-  font-size:13px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.8px;
-  color:var(--text-muted);
-  display:flex;align-items:center;gap:8px;
-}
-.live-indicator{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--success);
-  box-shadow:0 0 8px var(--success);
-  animation:live-blink 1s ease-in-out infinite alternate;
-}
-@keyframes live-blink{from{opacity:1}to{opacity:0.3}}
-
-/* Progress bar */
-.heal-progress{
-  margin-bottom:14px;padding:12px 16px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-}
-.heal-progress-label{
-  display:flex;justify-content:space-between;
-  font-size:12px;font-weight:600;
-  margin-bottom:8px;
-  color:var(--text-muted);
-}
-.heal-progress-pct{color:var(--primary);font-family:'JetBrains Mono',monospace;}
-.progress-bar-bg{
-  height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;
-}
-.progress-bar-fill{
-  height:100%;border-radius:4px;
-  background:linear-gradient(90deg,var(--primary),var(--success));
-  width:0%;
-  transition:width 0.5s ease;
-  box-shadow:0 0 12px rgba(99,102,241,0.5);
-}
-
-/* Log stream */
-.log-stream{
-  height:240px;overflow-y:auto;
-  background:rgba(0,0,0,0.3);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:12px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:11.5px;
-  line-height:1.8;
-  display:flex;flex-direction:column;gap:0;
-}
-[data-theme="light"] .log-stream{background:rgba(0,0,0,0.05);}
-.log-stream::-webkit-scrollbar{width:4px;}
-.log-stream::-webkit-scrollbar-track{background:transparent;}
-.log-stream::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:2px;}
-
-.log-entry{
-  display:flex;gap:8px;
-  animation:log-appear 0.3s ease forwards;
-}
-@keyframes log-appear{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.log-ts{color:var(--text-faint);flex-shrink:0;}
-.log-msg{color:var(--text-muted);}
-.log-msg.ok{color:var(--success);}
-.log-msg.warn{color:var(--warning);}
-.log-msg.err{color:var(--danger);}
-.log-msg.info{color:var(--info);}
-
-/* ═══════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════ */
-.toast-container{
-  position:fixed;bottom:24px;right:24px;z-index:1000;
-  display:flex;flex-direction:column;gap:10px;
-  pointer-events:none;
-}
-.toast{
-  padding:12px 18px;border-radius:var(--radius);
-  font-size:13px;font-weight:500;
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--border);
-  pointer-events:all;
-  animation:toast-in 0.3s ease forwards;
-  display:flex;align-items:center;gap:10px;
-  min-width:280px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.3);
-}
-.toast.danger{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:var(--danger);}
-.toast.warning{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);color:var(--warning);}
-.toast.success{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3);color:var(--success);}
-.toast.info{background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);color:var(--info);}
-@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-@keyframes toast-out{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(20px)}}
-
-/* ═══════════════════════════════════════════════════
-   CHAOS ACTIVE OVERLAY
-═══════════════════════════════════════════════════ */
-.chaos-active-bar{
-  display:none;
-  align-items:center;gap:12px;
-  padding:10px 16px;
-  background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(245,158,11,0.1));
-  border:1px solid rgba(239,68,68,0.25);
-  border-radius:var(--radius);
-  margin-bottom:16px;
-  font-size:13px;font-weight:600;
-  color:var(--warning);
-  animation:chaos-bar-glow 2s ease-in-out infinite alternate;
-}
-.chaos-active-bar.visible{display:flex;}
-@keyframes chaos-bar-glow{
-  from{box-shadow:0 0 8px rgba(239,68,68,0.2);}
-  to{box-shadow:0 0 20px rgba(239,68,68,0.4);}
-}
-.chaos-spinner{
-  width:16px;height:16px;border:2px solid rgba(239,68,68,0.3);
-  border-top-color:var(--danger);border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════ */
-@media(max-width:1100px){
-  .chaos-grid{grid-template-columns:1fr;}
-}
-@media(max-width:768px){
-  .preset-grid{grid-template-columns:1fr;}
-  .nav-links{display:none;}
-  main{padding:16px;}
-}
-</style>
+    /* Toast */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; color: var(--text);
+      font-size: 14px; box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 10px;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
 </head>
 <body>
-<!-- ═══ NAV ═══ -->
-<nav>
-  <a class="nav-brand" href="index.html">
-    <div class="nav-logo">V</div>
-    <span class="nav-title">VAULT</span>
-  </a>
-  <div class="nav-links">
-    <a href="index.html">Dashboard</a>
-    <a href="files.html">Files</a>
-    <a href="cluster.html">Cluster</a>
-    <a href="chaos.html" class="active">Chaos Studio</a>
-    <a href="settings.html">Settings</a>
-  </div>
-  <div class="nav-actions">
-    <div class="status-dot" title="Cluster Online"></div>
-    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
-  </div>
-</nav>
 
-<!-- ═══ MAIN ═══ -->
-<main>
-  <!-- Page header -->
-  <div class="page-header">
-    <h1 class="page-title">⚡ Chaos Studio</h1>
-    <span class="badge badge-sim">⚠ Simulation Mode</span>
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
 
-  <!-- Warning banner -->
-  <div class="warn-banner">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-    </svg>
-    <span>Changes here affect <strong>simulated nodes only</strong>. Your real data is completely safe and unaffected.</span>
-  </div>
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <div class="brand-icon">🔐</div>
+      <div class="brand-title">Vault</div>
+    </a>
 
-  <!-- Chaos active bar -->
-  <div class="chaos-active-bar" id="chaosActiveBar">
-    <div class="chaos-spinner"></div>
-    <span id="chaosActiveText">Chaos simulation running — Vault is healing...</span>
-  </div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="dashboard.html">📊 Dashboard</a></li>
+      <li class="nav-item"><a href="files.html">📁 File Manager</a></li>
+      <li class="nav-item"><a href="cluster.html">🖥️ Cluster Health</a></li>
+      <li class="nav-item active"><a href="chaos.html">⚡ Chaos Lab</a></li>
+      <li class="nav-item"><a href="settings.html">⚙️ Settings</a></li>
+    </ul>
+  </aside>
 
-  <!-- Two-column grid -->
-  <div class="chaos-grid">
-    <!-- ═══ LEFT COLUMN ═══ -->
-    <div class="left-col">
-
-      <!-- Section 1: Node Controls -->
-      <div class="card">
-        <div class="card-title">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-          Node Controls
-        </div>
-        <div class="node-list" id="nodeList"></div>
+  <main class="main-wrapper">
+    <div class="chaos-banner">
+      <div>
+        <span class="chaos-badge">⚡ Safe Simulation Studio</span>
+        <h2 style="font-size: 20px; font-weight: 800; margin: 8px 0 4px;">Disaster Recovery & Chaos Injection Lab</h2>
+        <p style="font-size: 13px; color: var(--text-muted);">Test catastrophic node crashes, partial network partitions, and on-disk bit corruption. Observe sub-second auto-repair.</p>
       </div>
 
-      <!-- Section 2: Bit Corruption Injector -->
-      <div class="card">
-        <div class="card-title">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M9.172 20.485L3.515 14.83a2 2 0 010-2.83l10-10a2 2 0 012.83 0l5.657 5.657a2 2 0 010 2.83l-10 10a2 2 0 01-2.83 0z"/></svg>
-          Bit Corruption Injector
-        </div>
-        <div class="form-row">
-          <label class="form-label">Select File</label>
-          <select class="form-select" id="corruptFile">
-            <option>backup-2024-01.tar.gz (2.3 GB)</option>
-            <option>database-dump.sql (890 MB)</option>
-            <option>media-archive.zip (5.1 GB)</option>
-            <option>config-snapshot.json (12 KB)</option>
-            <option>logs-november.tar (1.2 GB)</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-label">Select Chunk</label>
-          <select class="form-select" id="corruptChunk">
-            <option>Chunk #1 (1MB)</option>
-            <option>Chunk #2 (1MB)</option>
-            <option>Chunk #3 (1MB)</option>
-            <option>Chunk #4 (1MB)</option>
-            <option>Chunk #5 (1MB)</option>
-            <option>Random chunk</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-label">Target Node</label>
-          <select class="form-select" id="corruptNode">
-            <option>Node-A (AZ-1)</option>
-            <option>Node-B (AZ-1)</option>
-            <option>Node-C (AZ-2)</option>
-            <option>Node-D (AZ-2)</option>
-            <option>Node-E (AZ-3)</option>
-          </select>
-        </div>
-        <button class="btn btn-danger" onclick="injectCorruption()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          Inject Corruption
-        </button>
-        <div class="inject-result" id="corruptResult">
-          ☣ Corruption injected into <strong id="crChunk">Chunk #3</strong> on <strong id="crNode">Node-C</strong>.<br/>
-          Scrubber will detect this in ~15 seconds...<br/>
-          <span style="color:var(--info)">SHA-256 checksum mismatch will trigger repair.</span>
-        </div>
-      </div>
+      <button class="btn btn-secondary" onclick="restoreAll()">🔄 Restore All Nodes</button>
+    </div>
 
-      <!-- Section 3: Latency Injector -->
-      <div class="card">
-        <div class="card-title">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-          Latency Injector
-        </div>
-        <div class="form-row">
-          <label class="form-label">Target Node</label>
-          <select class="form-select" id="latencyNode">
-            <option>Node-A (AZ-1)</option>
-            <option>Node-B (AZ-1)</option>
-            <option>Node-D (AZ-2)</option>
-            <option>Node-G (AZ-3)</option>
-            <option>Node-H (AZ-3)</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-label">
-            <div class="slider-header">
-              <span>Latency Amount</span>
-              <span class="slider-val" id="latValDisplay">2000ms</span>
+    <div class="chaos-grid">
+      <!-- Left: Fault Injection Controls -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Node Control -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title"><span>☠️</span> Storage Node Fault Injection</div>
+          </div>
+
+          <div class="node-row" id="rowNode1">
+            <div class="node-row-info">
+              <div class="node-status-dot" id="dot1"></div>
+              <div>
+                <strong style="font-size: 14px;">Node Alpha</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Port: 9001 · 28 Chunks</div>
+              </div>
             </div>
-          </label>
-          <div class="slider-wrap">
-            <input type="range" min="0" max="5000" step="100" value="2000" id="latencySlider"
-              oninput="document.getElementById('latValDisplay').textContent=this.value+'ms'"/>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-danger" id="btnKill1" onclick="killNode(1, 'Node Alpha')">☠️ Kill Node</button>
+              <button class="btn btn-sm btn-secondary" onclick="injectLatency(1, 'Node Alpha')">⏱️ +2000ms</button>
+            </div>
+          </div>
+
+          <div class="node-row" id="rowNode2">
+            <div class="node-row-info">
+              <div class="node-status-dot" id="dot2"></div>
+              <div>
+                <strong style="font-size: 14px;">Node Beta</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Port: 9002 · 28 Chunks</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-danger" id="btnKill2" onclick="killNode(2, 'Node Beta')">☠️ Kill Node</button>
+              <button class="btn btn-sm btn-secondary" onclick="injectLatency(2, 'Node Beta')">⏱️ +2000ms</button>
+            </div>
+          </div>
+
+          <div class="node-row" id="rowNode3">
+            <div class="node-row-info">
+              <div class="node-status-dot" id="dot3"></div>
+              <div>
+                <strong style="font-size: 14px;">Node Gamma</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Port: 9003 · 27 Chunks</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-sm btn-danger" id="btnKill3" onclick="killNode(3, 'Node Gamma')">☠️ Kill Node</button>
+              <button class="btn btn-sm btn-secondary" onclick="injectLatency(3, 'Node Gamma')">⏱️ +2000ms</button>
+            </div>
           </div>
         </div>
-        <button class="btn btn-warning" onclick="injectLatency()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-          Apply Latency
-        </button>
-        <div class="inject-result" id="latencyResult" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--warning);">
-          ⏱ <strong id="latNode">Node-A</strong> now has <strong id="latMs">2000ms</strong> artificial delay injected.<br/>
-          Node shown with clock overlay in topology view.
+
+        <!-- Silent Bit Corruption Scrubber Test -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title"><span>🧪</span> Anti-Bit-Rot Scrubber Benchmark</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Deliberately flip random bytes inside a binary chunk block on disk to simulate magnetic bit decay.
+          </p>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="injectBitRot()">
+            <span>☣️</span> Inject Silent Bit-Rot into Random Chunk
+          </button>
+        </div>
+
+        <!-- Preset Disaster Scenarios -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title"><span>🧠</span> Multi-Failure Disaster Scenarios</div>
+          </div>
+
+          <div class="scenario-card" onclick="runScenario('partition')">
+            <div>
+              <strong>🌐 Partial Network Partition</strong>
+              <div style="font-size: 12px; color: var(--text-muted);">Isolates Node Alpha; Gateway routes reads to Beta & Gamma.</div>
+            </div>
+            <span style="font-size: 18px;">▶</span>
+          </div>
+
+          <div class="scenario-card" onclick="runScenario('cascade')">
+            <div>
+              <strong>🌊 Cascading Node Outage</strong>
+              <div style="font-size: 12px; color: var(--text-muted);">Kills 2 nodes sequentially; heals from remaining 3rd replica.</div>
+            </div>
+            <span style="font-size: 18px;">▶</span>
+          </div>
         </div>
       </div>
 
-      <!-- Section 4: Scenario Presets -->
-      <div class="card">
-        <div class="card-title">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Scenario Presets
-        </div>
-        <div class="preset-grid">
-          <button class="preset-card" onclick="runPreset('splitbrain')" id="preset-splitbrain">
-            <span class="preset-icon">🧠</span>
-            <div class="preset-name">Split Brain</div>
-            <div class="preset-desc">Kills 2 nodes in different availability zones</div>
-            <div class="preset-recovery">~Est. recovery: 45s</div>
-          </button>
-          <button class="preset-card" onclick="runPreset('cascade')" id="preset-cascade">
-            <span class="preset-icon">🌊</span>
-            <div class="preset-name">Cascade Failure</div>
-            <div class="preset-desc">Kills 3 nodes with 2-second delay each</div>
-            <div class="preset-recovery">~Est. recovery: 90s</div>
-          </button>
-          <button class="preset-card" onclick="runPreset('masscorrupt')" id="preset-masscorrupt">
-            <span class="preset-icon">☣</span>
-            <div class="preset-name">Mass Corruption</div>
-            <div class="preset-desc">Corrupts 5 random chunks simultaneously</div>
-            <div class="preset-recovery">~Est. recovery: 30s</div>
-          </button>
-          <button class="preset-card" onclick="runPreset('netpartition')" id="preset-netpartition">
-            <span class="preset-icon">🔌</span>
-            <div class="preset-name">Network Partition</div>
-            <div class="preset-desc">Adds 5000ms latency to 3 nodes</div>
-            <div class="preset-recovery">~Est. recovery: 20s</div>
-          </button>
-        </div>
-      </div>
-
-    </div><!-- /left-col -->
-
-    <!-- ═══ RIGHT COLUMN ═══ -->
-    <div class="right-col">
-
-      <!-- Topology Canvas -->
-      <div class="topology-card">
-        <div class="topology-header">
-          <span class="topology-title">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v4l-4 6M12 11l4 6"/></svg>
-            Live Cluster Topology
-          </span>
-          <div class="topology-stats">
-            <div class="topo-stat"><div class="topo-dot" style="background:var(--success)"></div><span style="color:var(--text-muted)" id="onlineCount">7 Online</span></div>
-            <div class="topo-stat"><div class="topo-dot" style="background:var(--danger)"></div><span style="color:var(--text-muted)" id="offlineCount">2 Offline</span></div>
-            <div class="topo-stat"><div class="topo-dot" style="background:var(--warning)"></div><span style="color:var(--text-muted)" id="latencyCount">0 Degraded</span></div>
-          </div>
-        </div>
-        <canvas id="topoCanvas"></canvas>
-      </div>
-
-      <!-- Healing Log -->
-      <div class="heal-card">
-        <div class="heal-header">
-          <div class="heal-title">
-            <div class="live-indicator"></div>
-            Live Healing Log
-          </div>
-          <button class="btn-xs btn-kill" onclick="clearLog()" style="background:var(--surface-2);color:var(--text-faint);">Clear</button>
-        </div>
-
-        <div class="heal-progress">
-          <div class="heal-progress-label">
-            <span id="repairLabel">Repair Progress</span>
-            <span class="heal-progress-pct" id="repairPct">0 / 0 chunks</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="repairBar"></div>
-          </div>
+      <!-- Right: Real-Time Healing Stream Log -->
+      <div class="panel-card" style="display: flex; flex-direction: column;">
+        <div class="panel-header">
+          <div class="panel-title"><span>📡</span> Live Self-Healing & Scrubber Stream</div>
+          <button class="btn btn-sm btn-secondary" onclick="clearLog()">Clear Stream</button>
         </div>
 
         <div class="log-stream" id="logStream">
           <div class="log-entry">
-            <span class="log-ts">[00:00]</span>
-            <span class="log-msg info">Chaos Studio initialized. All systems nominal.</span>
+            <span class="log-time">[00:00.01]</span>
+            <span class="log-msg ok">Cluster initialized with 3 healthy nodes. Quorum: 3x.</span>
           </div>
           <div class="log-entry">
-            <span class="log-ts">[00:00]</span>
-            <span class="log-msg">9 nodes active · 3x replication healthy · 0 pending repairs</span>
+            <span class="log-time">[00:00.02]</span>
+            <span class="log-msg info">Scrubber daemon armed. Next verification pass in 3600s.</span>
           </div>
         </div>
       </div>
+    </div>
+  </main>
 
-    </div><!-- /right-col -->
-  </div>
-</main>
+  <div class="toast-container" id="toastContainer"></div>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
+  <script>
+    let nodeAlive = { 1: true, 2: true, 3: true };
 
-<script>
-/* ═══════════════════════════════════════════════════
-   THEME
-═══════════════════════════════════════════════════ */
-function toggleTheme(){
-  const html = document.documentElement;
-  const btn = document.querySelector('.theme-btn');
-  if(html.getAttribute('data-theme')==='dark'){
-    html.setAttribute('data-theme','light');
-    btn.textContent='☀️';
-  }else{
-    html.setAttribute('data-theme','dark');
-    btn.textContent='🌙';
-  }
-  // Redraw canvas on theme change
-  setTimeout(drawTopology,50);
-}
+    function log(msg, type = 'info') {
+      const stream = document.getElementById('logStream');
+      const now = new Date();
+      const timeStr = `[${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().slice(0, 2)}]`;
 
-/* ═══════════════════════════════════════════════════
-   NODE STATE
-═══════════════════════════════════════════════════ */
-const NODES = [
-  {id:'node-a',name:'Node-A',zone:'AZ-1',status:'online'},
-  {id:'node-b',name:'Node-B',zone:'AZ-1',status:'online'},
-  {id:'node-c',name:'Node-C',zone:'AZ-2',status:'killed'},
-  {id:'node-d',name:'Node-D',zone:'AZ-2',status:'online'},
-  {id:'node-e',name:'Node-E',zone:'AZ-2',status:'online'},
-  {id:'node-f',name:'Node-F',zone:'AZ-3',status:'killed'},
-  {id:'node-g',name:'Node-G',zone:'AZ-3',status:'online'},
-  {id:'node-h',name:'Node-H',zone:'AZ-3',status:'online'},
-  {id:'node-i',name:'Node-I',zone:'AZ-1',status:'online'},
-];
-
-/* Latency values per node */
-const nodeLatency = {};
-
-/* ═══════════════════════════════════════════════════
-   RENDER NODE LIST
-═══════════════════════════════════════════════════ */
-function renderNodes(){
-  const list = document.getElementById('nodeList');
-  list.innerHTML = '';
-  NODES.forEach(node => {
-    const isKilled = node.status === 'killed';
-    const hasLatency = nodeLatency[node.id] > 0;
-    const isCorrupted = node.status === 'corrupted';
-    let itemClass = 'node-item';
-    if(isKilled) itemClass += ' killed';
-    else if(hasLatency) itemClass += ' latency';
-    if(isCorrupted) itemClass += ' corrupted';
-
-    let statusLabel = 'ONLINE', statusClass = 'status-online';
-    if(isKilled){statusLabel='OFFLINE';statusClass='status-offline';}
-    else if(isCorrupted){statusLabel='CORRUPT';statusClass='status-corrupted';}
-    else if(hasLatency){statusLabel='DEGRADED';statusClass='status-latency';}
-
-    list.innerHTML += `
-    <div class="${itemClass}" id="nodeitem-${node.id}">
-      <div>
-        <div class="node-name">${node.name}</div>
-        <div class="node-zone">${node.zone}${hasLatency?' · '+nodeLatency[node.id]+'ms delay':''}</div>
-      </div>
-      <span class="status-badge ${statusClass}">${statusLabel}</span>
-      <div class="node-actions">
-        ${!isKilled
-          ? `<button class="btn-xs btn-kill" onclick="killNode('${node.id}')">☠ Kill</button>`
-          : `<button class="btn-xs btn-restore" onclick="restoreNode('${node.id}')">↺ Restore</button>`}
-        ${!isKilled
-          ? `<button class="btn-xs btn-latency" onclick="quickLatency('${node.id}')">⏱</button>`
-          : ''}
-      </div>
-    </div>`;
-  });
-  updateCounts();
-}
-
-function getNode(id){return NODES.find(n=>n.id===id);}
-
-function killNode(id){
-  const node = getNode(id);
-  if(!node || node.status==='killed') return;
-  node.status = 'killed';
-  renderNodes();
-  drawTopology();
-  appendLog(`Node ${node.name} marked <span class="log-msg err">OFFLINE</span>`, 'err');
-  startRepairSimulation(node.name);
-  showToast(`☠ ${node.name} killed!`, 'danger');
-  document.getElementById('chaosActiveBar').classList.add('visible');
-}
-
-function restoreNode(id){
-  const node = getNode(id);
-  if(!node || node.status!=='killed') return;
-  node.status = 'online';
-  renderNodes();
-  drawTopology();
-  appendLog(`Node ${node.name} <span class="log-msg ok">restored ✓</span>`, 'ok');
-  showToast(`✓ ${node.name} restored`, 'success');
-  checkChaosActive();
-}
-
-function quickLatency(id){
-  const node = getNode(id);
-  if(!node || node.status==='killed') return;
-  nodeLatency[node.id] = 2000;
-  renderNodes();
-  drawTopology();
-  appendLog(`Node ${node.name} — artificial latency <span class="log-msg warn">2000ms</span> injected`, 'warn');
-  showToast(`⏱ Latency injected into ${node.name}`, 'warning');
-}
-
-function updateCounts(){
-  const online = NODES.filter(n=>n.status!=='killed').length;
-  const offline = NODES.filter(n=>n.status==='killed').length;
-  const lat = Object.values(nodeLatency).filter(v=>v>0).length;
-  document.getElementById('onlineCount').textContent = online+' Online';
-  document.getElementById('offlineCount').textContent = offline+' Offline';
-  document.getElementById('latencyCount').textContent = lat+' Degraded';
-}
-
-function checkChaosActive(){
-  const anyKilled = NODES.some(n=>n.status==='killed');
-  const anyLat = Object.values(nodeLatency).some(v=>v>0);
-  if(!anyKilled && !anyLat){
-    document.getElementById('chaosActiveBar').classList.remove('visible');
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   CANVAS TOPOLOGY
-═══════════════════════════════════════════════════ */
-const canvas = document.getElementById('topoCanvas');
-const ctx = canvas.getContext('2d');
-
-// Node positions (computed dynamically)
-let nodePositions = [];
-
-// Particles for repair animation
-const particles = [];
-
-function computeNodePositions(w, h){
-  // Arrange 9 nodes in 3 zones (3 each)
-  const zones = [
-    {label:'AZ-1', x: w*0.2,  nodes:['node-a','node-b','node-i']},
-    {label:'AZ-2', x: w*0.5,  nodes:['node-c','node-d','node-e']},
-    {label:'AZ-3', x: w*0.8,  nodes:['node-f','node-g','node-h']},
-  ];
-  const posMap = {};
-  zones.forEach(zone => {
-    zone.nodes.forEach((nid,i) => {
-      const yBase = h*0.15;
-      const yStep = (h*0.7) / (zone.nodes.length-1||1);
-      posMap[nid] = {x: zone.x, y: yBase + i*yStep, zone: zone.label};
-    });
-  });
-  return posMap;
-}
-
-function drawTopology(){
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
-  const W = rect.width, H = rect.height;
-
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  const posMap = computeNodePositions(W, H);
-  nodePositions = posMap;
-
-  // Background
-  ctx.clearRect(0,0,W,H);
-
-  // Draw zone backgrounds
-  const zones = [
-    {label:'AZ-1',x:W*0.2},
-    {label:'AZ-2',x:W*0.5},
-    {label:'AZ-3',x:W*0.8},
-  ];
-  zones.forEach(z => {
-    const grd = ctx.createRadialGradient(z.x, H/2, 20, z.x, H/2, 120);
-    grd.addColorStop(0, isDark ? 'rgba(99,102,241,0.04)' : 'rgba(99,102,241,0.06)');
-    grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.roundRect(z.x-90, H*0.05, 180, H*0.9, 16);
-    ctx.fill();
-
-    // Zone label
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillStyle = isDark ? 'rgba(148,163,184,0.4)' : 'rgba(71,85,105,0.5)';
-    ctx.textAlign = 'center';
-    ctx.fillText(z.label, z.x, H*0.96);
-  });
-
-  // Draw edges between ALL nodes
-  const nodeIds = NODES.map(n=>n.id);
-  for(let i=0; i<nodeIds.length; i++){
-    for(let j=i+1; j<nodeIds.length; j++){
-      const a = posMap[nodeIds[i]], b = posMap[nodeIds[j]];
-      if(!a||!b) continue;
-      const nodeA = getNode(nodeIds[i]), nodeB = getNode(nodeIds[j]);
-      const aKilled = nodeA.status==='killed', bKilled = nodeB.status==='killed';
-      if(aKilled||bKilled) continue;
-      // only draw within zone or cross-zone for key connections
-      const sameZone = a.zone===b.zone;
-      // draw all same-zone + some cross-zone
-      if(sameZone || Math.abs(i-j)<=3){
-        ctx.beginPath();
-        ctx.moveTo(a.x,a.y);
-        ctx.lineTo(b.x,b.y);
-        ctx.strokeStyle = isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.15)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">${timeStr}</span> <span class="log-msg ${type}">${msg}</span>`;
+      stream.appendChild(entry);
+      stream.scrollTop = stream.scrollHeight;
     }
-  }
 
-  // Draw nodes
-  NODES.forEach(node => {
-    const pos = posMap[node.id];
-    if(!pos) return;
-    const isKilled = node.status === 'killed';
-    const hasLatency = nodeLatency[node.id] > 0;
-    const isCorrupted = node.status === 'corrupted';
-    const r = 24;
+    function killNode(id, name) {
+      if (nodeAlive[id]) {
+        nodeAlive[id] = false;
+        document.getElementById(`dot${id}`).className = 'node-status-dot offline';
+        document.getElementById(`btnKill${id}`).textContent = '🔄 Reboot';
+        document.getElementById(`btnKill${id}`).className = 'btn btn-sm btn-secondary';
 
-    // Glow ring for online nodes
-    if(!isKilled){
-      if(hasLatency){
-        // pulsing amber ring
-        const glowR = r + 10 + Math.sin(Date.now()/400)*5;
-        const grd = ctx.createRadialGradient(pos.x,pos.y,r,pos.x,pos.y,glowR);
-        grd.addColorStop(0,'rgba(245,158,11,0.3)');
-        grd.addColorStop(1,'rgba(245,158,11,0)');
-        ctx.beginPath();
-        ctx.arc(pos.x,pos.y,glowR,0,Math.PI*2);
-        ctx.fillStyle=grd;ctx.fill();
-      } else if(!isCorrupted){
-        const grd = ctx.createRadialGradient(pos.x,pos.y,r-4,pos.x,pos.y,r+12);
-        grd.addColorStop(0,'rgba(99,102,241,0.25)');
-        grd.addColorStop(1,'rgba(99,102,241,0)');
-        ctx.beginPath();
-        ctx.arc(pos.x,pos.y,r+8,0,Math.PI*2);
-        ctx.fillStyle=grd;ctx.fill();
+        log(`CRITICAL: ${name} missed heartbeat! Node marked OFFLINE.`, 'err');
+        showToast(`☠️ ${name} stopped! Self-healing worker spawned.`, 'danger');
+
+        setTimeout(() => {
+          log(`RepairWorker: Detected 28 under-replicated chunks from ${name}.`, 'warn');
+        }, 600);
+
+        setTimeout(() => {
+          log(`RepairWorker: Replicating missing chunks from surviving peers...`, 'info');
+        }, 1200);
+
+        setTimeout(() => {
+          log(`RepairWorker: All 28 chunks successfully re-replicated! 0% data loss.`, 'ok');
+          showToast(`✅ Auto-recovery finished in 1.8s! Zero data loss.`, 'success');
+        }, 1800);
+      } else {
+        nodeAlive[id] = true;
+        document.getElementById(`dot${id}`).className = 'node-status-dot';
+        document.getElementById(`btnKill${id}`).textContent = '☠️ Kill Node';
+        document.getElementById(`btnKill${id}`).className = 'btn btn-sm btn-danger';
+
+        log(`${name} rebooted. Re-synchronizing metadata with Gateway...`, 'info');
+        setTimeout(() => {
+          log(`${name} is now synchronized & HEALTHY.`, 'ok');
+          showToast(`✅ ${name} restored!`, 'success');
+        }, 600);
       }
     }
 
-    // Node circle
-    ctx.beginPath();
-    ctx.arc(pos.x,pos.y,r,0,Math.PI*2);
-    if(isKilled){
-      ctx.fillStyle = isDark ? '#1C1C2E' : '#E2E8F0';
-      ctx.strokeStyle = 'rgba(239,68,68,0.4)';
-    } else if(isCorrupted){
-      ctx.fillStyle = isDark ? '#2A1A1A' : '#FEE2E2';
-      ctx.strokeStyle = 'rgba(239,68,68,0.7)';
-    } else if(hasLatency){
-      ctx.fillStyle = isDark ? '#1C1C10' : '#FFFBEB';
-      ctx.strokeStyle = 'rgba(245,158,11,0.6)';
-    } else {
-      ctx.fillStyle = isDark ? '#1A1A2E' : '#EEF2FF';
-      ctx.strokeStyle = 'rgba(99,102,241,0.5)';
-    }
-    ctx.lineWidth = 2;
-    ctx.fill();
-    ctx.stroke();
-
-    // Icon/text inside node
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    if(isKilled){
-      ctx.font = '16px serif';
-      ctx.fillStyle = 'rgba(239,68,68,0.6)';
-      ctx.fillText('✕', pos.x, pos.y);
-    } else if(isCorrupted){
-      ctx.font = 'bold 16px serif';
-      ctx.fillStyle = '#EF4444';
-      ctx.fillText('!', pos.x, pos.y);
-    } else if(hasLatency){
-      ctx.font = '14px serif';
-      ctx.fillStyle = '#F59E0B';
-      ctx.fillText('⏱', pos.x, pos.y);
-    } else {
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
-      ctx.fillStyle = isDark ? 'rgba(99,102,241,0.9)' : '#6366F1';
-      ctx.fillText(node.name.split('-')[1], pos.x, pos.y);
+    function injectLatency(id, name) {
+      log(`LatencyInjector: +2000ms synthetic delay applied to ${name}.`, 'warn');
+      showToast(`⏱️ Injected 2000ms network delay on ${name}`, 'warning');
+      setTimeout(() => {
+        log(`Gateway: Request timed out on ${name}; dynamic fallback to secondary node completed in 12ms.`, 'ok');
+      }, 700);
     }
 
-    // Node label below
-    ctx.font = '10px Inter, sans-serif';
-    ctx.fillStyle = isDark ? (isKilled ? 'rgba(239,68,68,0.5)' : 'rgba(148,163,184,0.7)') : 'rgba(71,85,105,0.8)';
-    ctx.fillText(node.name, pos.x, pos.y+r+12);
-  });
+    function injectBitRot() {
+      log(`CHAOS: Injected random bit-flip into block #07 (enterprise_backup.tar.gz).`, 'err');
+      showToast(`☣️ Bit-rot injected into chunk #07! Scrubber running...`, 'danger');
 
-  // Draw particles
-  particles.forEach((p,i) => {
-    if(p.done) return;
-    const t = p.progress;
-    const x = p.fromX + (p.toX - p.fromX)*t;
-    const y = p.fromY + (p.toY - p.fromY)*t;
-    const alpha = Math.sin(t*Math.PI);
-    ctx.beginPath();
-    ctx.arc(x,y,4,0,Math.PI*2);
-    ctx.fillStyle = `rgba(34,197,94,${alpha*0.9})`;
-    ctx.shadowColor = '#22C55E';
-    ctx.shadowBlur = 10;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-}
+      setTimeout(() => {
+        log(`Scrubber: Checksum mismatch on Node Gamma! Expected: 7dccad5f... Got: a19f02c4...`, 'warn');
+      }, 800);
 
-/* ═══════════════════════════════════════════════════
-   ANIMATION LOOP
-═══════════════════════════════════════════════════ */
-let lastTime = 0;
-function animLoop(ts){
-  if(ts - lastTime > 50){ // ~20fps
-    lastTime = ts;
-    // Update particles
-    particles.forEach(p => {
-      if(p.done) return;
-      p.progress += 0.025;
-      if(p.progress >= 1) p.done = true;
-    });
-    // Remove done particles
-    for(let i=particles.length-1;i>=0;i--){
-      if(particles[i].done) particles.splice(i,1);
+      setTimeout(() => {
+        log(`Scrubber: Restoring corrupted chunk from healthy Node Alpha replica...`, 'info');
+      }, 1400);
+
+      setTimeout(() => {
+        log(`Scrubber: Chunk #07 successfully restored and verified with SHA-256.`, 'ok');
+        showToast(`✅ Scrubber silently repaired corrupted block!`, 'success');
+      }, 2000);
     }
-    drawTopology();
-  }
-  requestAnimationFrame(animLoop);
-}
-requestAnimationFrame(animLoop);
 
-window.addEventListener('resize',()=>{drawTopology();});
-window.addEventListener('load',()=>{drawTopology();});
+    function runScenario(type) {
+      if (type === 'partition') {
+        log(`SCENARIO: Simulating Network Partition on Node Alpha...`, 'warn');
+        killNode(1, 'Node Alpha');
+      } else if (type === 'cascade') {
+        log(`SCENARIO: Triggering Cascading Node Outage (Node Alpha + Node Beta)...`, 'err');
+        killNode(1, 'Node Alpha');
+        setTimeout(() => killNode(2, 'Node Beta'), 800);
+      }
+    }
 
-/* ═══════════════════════════════════════════════════
-   REPAIR SIMULATION
-═══════════════════════════════════════════════════ */
-let repairInterval = null;
-let repairTotal = 0;
-let repairDone = 0;
-let repairNodeName = '';
-let repairSecond = 0;
-
-function startRepairSimulation(nodeName){
-  clearRepair();
-  repairTotal = Math.floor(Math.random()*30)+20;
-  repairDone = 0;
-  repairNodeName = nodeName;
-  repairSecond = 1;
-  document.getElementById('repairBar').style.width = '0%';
-  document.getElementById('repairPct').textContent = `0 / ${repairTotal} chunks`;
-  document.getElementById('repairLabel').textContent = `Repairing (${nodeName} offline)`;
-
-  const queue = [
-    () => appendLog(`Node ${nodeName} marked <span class="log-msg err">OFFLINE</span>`, 'err'),
-    () => appendLog(`Scanning for under-replicated chunks...`, 'info'),
-    () => appendLog(`<span class="log-msg warn">${repairTotal} chunks</span> found without required replicas`, 'warn'),
-    () => appendLog(`Repair worker pool spawned (4 workers)`, 'info'),
-    () => {
-      appendLog(`Replicating chunk-001 from Node-A → Node-B...`, '');
-      spawnParticle('node-a','node-b');
-    },
-    () => {
-      appendLog(`Replicating chunk-002 from Node-D → Node-G...`, '');
-      spawnParticle('node-d','node-g');
-    },
-  ];
-
-  let qi = 0;
-  repairInterval = setInterval(()=>{
-    repairSecond++;
-    if(qi < queue.length){
-      queue[qi]();qi++;
-    } else {
-      const batch = Math.floor(Math.random()*4)+1;
-      repairDone = Math.min(repairDone+batch, repairTotal);
-      const pct = Math.round(repairDone/repairTotal*100);
-      document.getElementById('repairBar').style.width = pct+'%';
-      document.getElementById('repairPct').textContent = `${repairDone} / ${repairTotal} chunks (${pct}%)`;
-
-      // Spawn repair particles
-      const onlineNodes = NODES.filter(n=>n.status!=='killed').map(n=>n.id);
-      if(onlineNodes.length>=2){
-        for(let i=0;i<Math.min(batch,2);i++){
-          const a = onlineNodes[Math.floor(Math.random()*onlineNodes.length)];
-          const b = onlineNodes[Math.floor(Math.random()*onlineNodes.length)];
-          if(a!==b) spawnParticle(a,b);
+    function restoreAll() {
+      [1, 2, 3].forEach(id => {
+        if (!nodeAlive[id]) {
+          const names = { 1: 'Node Alpha', 2: 'Node Beta', 3: 'Node Gamma' };
+          killNode(id, names[id]);
         }
-      }
-
-      if(repairDone < repairTotal){
-        appendLog(`chunk-${String(repairDone).padStart(3,'0')} <span class="log-msg ok">✓ Replicated</span>. ${repairTotal-repairDone} remaining`, 'ok');
-      }
-
-      if(repairDone >= repairTotal){
-        clearInterval(repairInterval);
-        repairInterval = null;
-        appendLog(`<span class="log-msg ok">✓ All ${repairTotal} chunks repaired! Cluster health: OPTIMAL</span>`, 'ok');
-        document.getElementById('repairLabel').textContent = 'Repair Complete ✓';
-        showToast('✓ All chunks repaired!', 'success');
-        checkChaosActive();
-      }
+      });
+      log(`ADMIN: All storage nodes restored to full health.`, 'ok');
+      showToast('All cluster nodes restored to full health!', 'success');
     }
-  }, 1500);
-}
 
-function clearRepair(){
-  if(repairInterval){clearInterval(repairInterval);repairInterval=null;}
-}
+    function clearLog() {
+      document.getElementById('logStream').innerHTML = '';
+      showToast('Log stream cleared', 'info');
+    }
 
-function spawnParticle(fromId, toId){
-  const posMap = nodePositions;
-  const fp = posMap[fromId], tp = posMap[toId];
-  if(!fp||!tp) return;
-  const dpr = window.devicePixelRatio||1;
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = rect.width / canvas.getBoundingClientRect().width;
-  particles.push({
-    fromX: fp.x, fromY: fp.y,
-    toX: tp.x, toY: tp.y,
-    progress: 0, done: false
-  });
-}
-
-/* ═══════════════════════════════════════════════════
-   INJECT CORRUPTION
-═══════════════════════════════════════════════════ */
-function injectCorruption(){
-  const file = document.getElementById('corruptFile').value.split(' ')[0];
-  const chunk = document.getElementById('corruptChunk').value;
-  const node = document.getElementById('corruptNode').value.split(' ')[0];
-  document.getElementById('crChunk').textContent = chunk;
-  document.getElementById('crNode').textContent = node;
-  document.getElementById('corruptResult').classList.add('visible');
-  appendLog(`☣ Corruption injected into ${chunk} on ${node}`, 'err');
-  appendLog(`Scrubber scheduled to detect corruption in ~15s`, 'warn');
-  showToast('☣ Bit corruption injected!', 'danger');
-  setTimeout(()=>{
-    appendLog(`Scrubber detected SHA-256 mismatch on ${chunk} @ ${node}`, 'warn');
-    appendLog(`Repair initiated: fetching clean copy from replicas...`, 'info');
-    setTimeout(()=>{
-      appendLog(`<span class="log-msg ok">✓ ${chunk} repaired from healthy replica</span>`, 'ok');
-      showToast(`✓ ${chunk} repaired`, 'success');
-    },4000);
-  },8000);
-}
-
-/* ═══════════════════════════════════════════════════
-   INJECT LATENCY
-═══════════════════════════════════════════════════ */
-function injectLatency(){
-  const sel = document.getElementById('latencyNode').value.split(' ')[0];
-  const ms = document.getElementById('latencySlider').value;
-  const nodeId = sel.toLowerCase().replace('-','') === 'nodea' ? 'node-a' :
-                 NODES.find(n=>n.name===sel)?.id;
-  if(nodeId){
-    nodeLatency[nodeId] = parseInt(ms);
-    renderNodes();
-  }
-  document.getElementById('latNode').textContent = sel;
-  document.getElementById('latMs').textContent = ms+'ms';
-  document.getElementById('latencyResult').classList.add('visible');
-  appendLog(`⏱ ${sel} — ${ms}ms latency injected`, 'warn');
-  showToast(`⏱ ${ms}ms latency on ${sel}`, 'warning');
-  document.getElementById('chaosActiveBar').classList.add('visible');
-}
-
-/* ═══════════════════════════════════════════════════
-   SCENARIO PRESETS
-═══════════════════════════════════════════════════ */
-function runPreset(preset){
-  const btn = document.getElementById('preset-'+preset);
-  btn.classList.add('running');
-  setTimeout(()=>btn.classList.remove('running'),5000);
-
-  if(preset==='splitbrain'){
-    appendLog('🧠 PRESET: Split Brain initiated', 'err');
-    setTimeout(()=>killNode('node-b'),200);
-    setTimeout(()=>killNode('node-g'),800);
-    showToast('🧠 Split Brain scenario running!', 'danger');
-    document.getElementById('chaosActiveBar').classList.add('visible');
-    document.getElementById('chaosActiveText').textContent = 'Split Brain scenario active — Vault bridging zones...';
-  } else if(preset==='cascade'){
-    appendLog('🌊 PRESET: Cascade Failure initiated', 'err');
-    showToast('🌊 Cascade Failure starting...', 'danger');
-    document.getElementById('chaosActiveBar').classList.add('visible');
-    document.getElementById('chaosActiveText').textContent = 'Cascade Failure in progress — 3 nodes falling...';
-    setTimeout(()=>{killNode('node-a');appendLog('Wave 1: Node-A killed','err');},300);
-    setTimeout(()=>{killNode('node-d');appendLog('Wave 2: Node-D killed','err');},2300);
-    setTimeout(()=>{killNode('node-h');appendLog('Wave 3: Node-H killed','err');},4300);
-  } else if(preset==='masscorrupt'){
-    appendLog('☣ PRESET: Mass Corruption — targeting 5 chunks', 'err');
-    showToast('☣ Mass corruption injected!', 'danger');
-    const chunks = ['chunk-034','chunk-089','chunk-112','chunk-201','chunk-307'];
-    chunks.forEach((c,i)=>{
-      setTimeout(()=>{
-        appendLog(`☣ ${c} corrupted on Node-${['A','C','E','G','I'][i]}`, 'err');
-      },i*400);
-    });
-    setTimeout(()=>{
-      appendLog('Scrubber detected 5 corrupted chunks — initiating batch repair','warn');
-      setTimeout(()=>{
-        chunks.forEach((c,i)=>{
-          setTimeout(()=>appendLog(`<span class="log-msg ok">✓ ${c} repaired</span>`,'ok'),i*600);
-        });
-      },3000);
-    },5000);
-  } else if(preset==='netpartition'){
-    appendLog('🔌 PRESET: Network Partition — adding 5000ms to 3 nodes', 'warn');
-    showToast('🔌 Network partition applied!', 'warning');
-    ['node-a','node-e','node-h'].forEach((nid,i)=>{
-      setTimeout(()=>{
-        nodeLatency[nid] = 5000;
-        renderNodes();
-        appendLog(`⏱ ${getNode(nid).name} — 5000ms latency applied`,'warn');
-      },i*500);
-    });
-    document.getElementById('chaosActiveBar').classList.add('visible');
-    document.getElementById('chaosActiveText').textContent = 'Network Partition active — 3 nodes at 5000ms...';
-  }
-}
-
-/* ═══════════════════════════════════════════════════
-   LOG
-═══════════════════════════════════════════════════ */
-let logSecond = 0;
-function appendLog(msg, type=''){
-  logSecond++;
-  const stream = document.getElementById('logStream');
-  const ts = '['+String(Math.floor(logSecond/60)).padStart(2,'0')+':'+String(logSecond%60).padStart(2,'0')+']';
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  entry.innerHTML = `<span class="log-ts">${ts}</span><span class="log-msg ${type}">${msg}</span>`;
-  stream.appendChild(entry);
-  stream.scrollTop = stream.scrollHeight;
-}
-
-function clearLog(){
-  document.getElementById('logStream').innerHTML='';
-  logSecond=0;
-  appendLog('Log cleared.','info');
-}
-
-/* ═══════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════ */
-function showToast(msg, type='info'){
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span>${msg}</span>`;
-  c.appendChild(t);
-  setTimeout(()=>{
-    t.style.animation = 'toast-out 0.3s ease forwards';
-    setTimeout(()=>t.remove(),300);
-  },3500);
-}
-
-/* ═══════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════ */
-renderNodes();
-
-// Simulate initial killed nodes
-setTimeout(()=>{
-  appendLog('Node-C marked <span class="log-msg err">OFFLINE</span> (pre-existing failure)','err');
-  appendLog('Node-F marked <span class="log-msg err">OFFLINE</span> (pre-existing failure)','err');
-  appendLog('47 chunks found without required replicas','warn');
-  appendLog('Repair workers active...','info');
-  document.getElementById('chaosActiveBar').classList.add('visible');
-  document.getElementById('repairTotal')
-  repairTotal = 47; repairDone = 23;
-  document.getElementById('repairBar').style.width = '49%';
-  document.getElementById('repairPct').textContent = '23 / 47 chunks (49%)';
-  document.getElementById('repairLabel').textContent = 'Repairing (Node-C, Node-F offline)';
-}, 600);
-</script>
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<span>${type === 'success' ? '✅' : type === 'danger' ? '⚠️' : 'ℹ️'}</span> <span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+  </script>
 </body>
 </html>
