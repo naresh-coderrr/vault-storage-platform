@@ -74,8 +74,9 @@
       root.querySelectorAll('[data-inspect]').forEach(btn => btn.onclick = async () => {
         const detail = await VaultAPI.get('/api/v1/cluster/nodes/' + btn.dataset.inspect);
         const box = document.getElementById('chunks-' + btn.dataset.inspect);
+        box.style.whiteSpace = 'pre-wrap';
         box.textContent = (detail.stored_chunks || []).slice(0, 8).map(c =>
-          `${c.filename}#${c.chunk_index}${c.is_corrupted ? ' corrupt' : ''}`
+          `${c.filename}  chunk ${c.chunk_index}${c.is_corrupted ? ' (corrupt)' : ''}`
         ).join('\n') || 'No chunks on this node.';
       });
     }
