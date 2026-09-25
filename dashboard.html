@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overview — Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;650;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/vault.css" />
+</head>
+<body>
+  <script src="js/vault.js"></script>
+  <script>
+    (async () => {
+      const root = await VaultShell.mount('overview');
+      if (!root) return;
+      VaultShell.setHeading('Cluster overview', 'Availability, replica pressure, and recent fabric events.');
+      const [health, events, files, nodes] = await Promise.all([
+        VaultAPI.get('/api/v1/cluster/health'),
+        VaultAPI.get('/api/v1/cluster/events'),
+        VaultAPI.get('/api/v1/objects'),
+        VaultAPI.get('/api/v1/cluster/nodes'),
+      ]);
+      root.innerHTML = `
+        <div class="grid-4" style="margin-bottom:16px">
+          <div class="card"><div class="stat-val">${health.healthScore}%</div><div class="stat-lbl">Health score</div></div>
+          <div class="card"><div class="stat-val">${health.healthyNodes}/${health.totalNodes}</div><div class="stat-lbl">Healthy nodes</div></div>
+          <div class="card"><div class="stat-val">${health.totalFiles}</div><div class="stat-lbl">Objects</div></div>
+          <div class="card"><div class="stat-val">${health.underReplicatedChunks}</div><div class="stat-lbl">Under-replicated chunks</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2 style="font-family:var(--font);margin-bottom:10px">Node mesh</h2>
+            <div class="node-grid">
+              ${nodes.map(n => `
+                <div class="node">
+                  <div style="display:flex;justify-content:space-between;gap:8px">
+                    <h3>${n.node_name}</h3>
+                    ${statusBadge(n.status)}
+                  </div>
+                  <p class="sub">${n.endpoint_url}</p>
+                  <div class="meter"><i style="width:${n.capacity.usedPercent}%"></i></div>
+                  <p class="sub">${fmtBytes(n.capacity.used)} of ${fmtBytes(n.capacity.total)} · ${n.stored_replicas_count} replicas</p>
+                </div>`).join('')}
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="font-family:var(--font);margin-bottom:10px">Activity</h2>
+            ${(events || []).slice(0, 10).map(ev => `
+              <div style="padding:8px 0;border-bottom:1px dashed var(--line)">
+                <div><strong>${ev.type}</strong> · ${ev.message}</div>
+                <div class="sub">${relative(ev.at)}</div>
+              </div>`).join('') || '<p class="sub">No events yet.</p>'}
+            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn btn-primary btn-sm" href="objects.html">Store an object</a>
+              <a class="btn btn-ghost btn-sm" href="repair.html">Run healer</a>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2 style="font-family:var(--font);margin-bottom:10px">Recent objects</h2>
+          <table>
+            <thead><tr><th>Name</th><th>Size</th><th>Replicas</th><th>Status</th></tr></thead>
+            <tbody>
+              ${files.slice(0,6).map(f => `<tr>
+                <td>${f.filename}</td>
+                <td>${fmtBytes(f.total_size)}</td>
+                <td>${f.replication_factor}× · ${f.replica_health.healthy_replicas}/${f.replica_health.total_replicas} healthy</td>
+                <td>${statusBadge(f.status)}</td>
+              </tr>`).join('') || '<tr><td colspan="4">No objects stored.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+    })().catch((e) => { document.body.textContent = e.message; });
+  </script>
+</body>
+</html>

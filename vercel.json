@@ -1,11 +1,14 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
-    { "source": "/files", "destination": "/files.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/objects", "destination": "/objects.html" },
+    { "source": "/files", "destination": "/objects.html" },
     { "source": "/cluster", "destination": "/cluster.html" },
-    { "source": "/chaos", "destination": "/chaos.html" },
-    { "source": "/settings", "destination": "/settings.html" }
+    { "source": "/repair", "destination": "/repair.html" },
+    { "source": "/settings", "destination": "/settings.html" },
+    { "source": "/chaos", "destination": "/cluster.html" }
   ]
 }

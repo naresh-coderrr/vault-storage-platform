@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Repair — Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;650;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/vault.css" />
+</head>
+<body>
+  <script src="js/vault.js"></script>
+  <script>
+    async function render(root) {
+      const data = await VaultAPI.get('/api/v1/cluster/repair');
+      const rows = data.underReplicated || [];
+      root.innerHTML = `
+        <div class="card" style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <p style="flex:1">Healer copies a healthy replica onto a live node that does not already hold the chunk. Scrub recomputes SHA-256 against metadata.</p>
+          <button class="btn btn-sage" id="heal">Run healer pass</button>
+          <button class="btn btn-ghost" id="scrub">Run integrity scrub</button>
+        </div>
+        <div class="card">
+          <h2 style="font-family:var(--font);margin-bottom:10px">Under-replicated chunks</h2>
+          <table>
+            <thead><tr><th>Object</th><th>Chunk</th><th>Healthy / policy</th></tr></thead>
+            <tbody>
+              ${rows.map(r => `<tr>
+                <td>${r.filename}</td>
+                <td class="mono">${r.chunk_index} · ${r.chunk_id.slice(0,8)}</td>
+                <td>${r.healthy_replica_count} / ${r.replication_factor}</td>
+              </tr>`).join('') || '<tr><td colspan="3">Every chunk meets its replication factor.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2 style="font-family:var(--font);margin-bottom:10px">Repair log</h2>
+          ${(data.events || []).map(ev => `<div style="padding:8px 0;border-bottom:1px dashed var(--line)"><strong>${ev.type}</strong> ${ev.message}<div class="sub">${relative(ev.at)}</div></div>`).join('')}
+        </div>
+      `;
+      document.getElementById('heal').onclick = async () => {
+        const res = await VaultAPI.send('/api/v1/cluster/repair', 'POST', {});
+        toast(`Healed ${res.healed} replica(s); ${res.remaining} still short`);
+        render(root);
+      };
+      document.getElementById('scrub').onclick = async () => {
+        const res = await VaultAPI.send('/api/v1/cluster/scrub', 'POST', {});
+        toast(`Scrub verified ${res.verified}, flagged ${res.corrupted}`);
+        render(root);
+      };
+    }
+
+    (async () => {
+      const root = await VaultShell.mount('repair');
+      if (!root) return;
+      VaultShell.setHeading('Repair & integrity', 'Automatic replica repair and checksum verification. Rebalance happens by placing new copies on emptiest healthy nodes.');
+      await render(root);
+    })().catch((e) => { document.body.textContent = e.message; });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;650;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/vault.css" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <section class="auth-art">
+      <a class="brand" href="index.html" style="color:#fff"><span class="mark">V</span> Vault</a>
+      <div>
+        <h2>Operator access to the storage fabric.</h2>
+        <p style="margin-top:12px;max-width:36ch;opacity:.92">Same contracts as the gateway: objects, cluster health, repair, and durability policy. Chaos toys and sharing folders stay out of this console.</p>
+      </div>
+      <p style="opacity:.8;font-size:13px">Fault-tolerant object storage</p>
+    </section>
+    <section class="auth-form">
+      <form class="auth-card" id="loginForm">
+        <h1>Sign in</h1>
+        <p class="sub">Use the seeded operator account to open the console.</p>
+        <div class="hint">Demo operator: <strong>operator@vault.local</strong> / <strong>vault-operator</strong></div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="username" required value="operator@vault.local" />
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <p class="error" id="loginError"></p>
+        <button class="btn btn-primary" type="submit" style="width:100%">Enter console</button>
+        <p style="margin-top:14px;text-align:center;font-size:13px"><a href="index.html">Back to homepage</a></p>
+      </form>
+    </section>
+  </div>
+  <script src="js/vault.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const err = document.getElementById('loginError');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      try {
+        const body = {
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+        };
+        const res = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Sign in failed');
+        VaultAuth.save(data);
+        const next = new URLSearchParams(location.search).get('next') || 'dashboard.html';
+        location.replace(next.replace(/[^a-z0-9.-]/gi, '') || 'dashboard.html');
+      } catch (ex) {
+        err.textContent = ex.message;
+      }
+    });
+  </script>
+</body>
+</html>
