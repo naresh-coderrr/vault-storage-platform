@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Objects — Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;650;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/vault.css" />
+</head>
+<body>
+  <script src="js/vault.js"></script>
+  <script>
+    let replication = 3;
+    let selected = null;
+
+    async function refresh(root) {
+      const [files, settings] = await Promise.all([
+        VaultAPI.get('/api/v1/objects'),
+        VaultAPI.get('/api/v1/cluster/settings').catch(() => ({ replicationFactor: 3 })),
+      ]);
+      replication = settings.replicationFactor || 3;
+      root.innerHTML = `
+        <div class="grid-2">
+          <div>
+            <div class="drop" id="drop">
+              <strong>Put object</strong>
+              <p class="sub">Drop a file or choose one. Vault chunks it and writes ${replication}× replicas to the emptiest healthy nodes.</p>
+              <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                <input id="fileInput" type="file" />
+                <label class="field" style="min-width:140px">
+                  <span>Replication</span>
+                  <select id="rep">
+                    ${[2,3,4,5].map(n => `<option ${n===replication?'selected':''}>${n}</option>`).join('')}
+                  </select>
+                </label>
+                <button class="btn btn-primary" id="uploadBtn" type="button">Upload</button>
+              </div>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <table>
+                <thead><tr><th>Object</th><th>Size</th><th>Chunks</th><th>Durability</th><th></th></tr></thead>
+                <tbody>
+                  ${files.map(f => `<tr>
+                    <td><button class="btn btn-ghost btn-sm" data-open="${f.id}">${f.filename}</button></td>
+                    <td>${fmtBytes(f.total_size)}</td>
+                    <td>${f.total_chunks}</td>
+                    <td>${statusBadge(f.status)} ${f.replication_factor}×</td>
+                    <td>
+                      <button class="btn btn-sage btn-sm" data-get="${f.id}" data-name="${f.filename}">Get</button>
+                      <button class="btn btn-danger btn-sm" data-del="${f.id}">Delete</button>
+                    </td>
+                  </tr>`).join('') || '<tr><td colspan="5">Cluster is empty. Upload an object.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" id="detail"><p class="sub">Select an object to see chunk placement and checksums.</p></div>
+        </div>
+      `;
+      const drop = document.getElementById('drop');
+      const input = document.getElementById('fileInput');
+      ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+      ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+      drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) put(e.dataTransfer.files[0]); });
+      document.getElementById('uploadBtn').onclick = () => {
+        if (!input.files[0]) return toast('Choose a file first');
+        put(input.files[0]);
+      };
+      root.querySelectorAll('[data-get]').forEach(btn => btn.onclick = async () => {
+        try { await VaultAPI.download(btn.dataset.get, btn.dataset.name); toast('Download started'); }
+        catch (e) { toast(e.message); }
+      });
+      root.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
+        if (!confirm('Purge this object and all replicas?')) return;
+        await VaultAPI.send('/api/v1/objects/' + btn.dataset.del, 'DELETE');
+        toast('Object purged');
+        refresh(root);
+      });
+      root.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => showDetail(btn.dataset.open));
+      if (selected) showDetail(selected);
+    }
+
+    async function put(file) {
+      const root = document.getElementById('pageRoot');
+      replication = parseInt(document.getElementById('rep').value, 10);
+      try {
+        await VaultAPI.upload(file, replication);
+        toast(`Stored ${file.name} at ${replication}×`);
+        await refresh(root);
+      } catch (e) { toast(e.message); }
+    }
+
+    async function showDetail(id) {
+      selected = id;
+      const panel = document.getElementById('detail');
+      const obj = await VaultAPI.get('/api/v1/objects/' + id);
+      panel.innerHTML = `
+        <h2 style="font-family:var(--font)">${obj.filename}</h2>
+        <div class="detail" style="margin:12px 0">
+          <div>SHA-256</div><div class="mono">${obj.file_hash}</div>
+          <div>Size</div><div>${fmtBytes(obj.total_size)}</div>
+          <div>Chunks</div><div>${obj.total_chunks} × ${fmtBytes(obj.chunk_size)}</div>
+          <div>Policy</div><div>${obj.replication_factor}× replication</div>
+        </div>
+        ${obj.chunks.map(ch => `
+          <div style="margin-bottom:10px">
+            <strong>Chunk ${ch.chunk_index}</strong>
+            <div class="mono">${ch.checksum.slice(0, 20)}…</div>
+            <div>${ch.replicas.map(r => `${r.node_name} ${r.is_corrupted ? '(corrupt)' : r.node_status}`).join(' · ')}</div>
+          </div>`).join('')}
+      `;
+    }
+
+    (async () => {
+      const root = await VaultShell.mount('objects');
+      if (!root) return;
+      VaultShell.setHeading('Objects', 'Put chunks into the cluster, get a verified assembly, or purge replicas.');
+      await refresh(root);
+    })().catch((e) => { document.body.textContent = e.message; });
+  </script>
+</body>
+</html>
