@@ -1,114 +1,47 @@
-# 🔐 Vault — Distributed Object Storage Platform
+# 🔐 Vault — Fault-Tolerant Distributed Object Storage Platform
 
-> **Google Drive simplicity. AWS-grade resilience underneath.**
+> **Google Drive simplicity. AWS S3 resilience underneath.**
 
-Vault is a polished, production-quality web dashboard for a resilient distributed object storage system — featuring real-time cluster telemetry, self-healing visualization, chaos engineering tools, and zero-knowledge browser-side encryption.
+Vault dynamically shards, replicates, and repairs data across independent storage nodes with SHA-256 cryptographic anti-bit-rot scrubbers, automated P2P healing, and Supabase cloud metadata synchronization.
 
-![Vault Dashboard](https://img.shields.io/badge/Status-Live-22C55E?style=for-the-badge)
-![Pages](https://img.shields.io/badge/Pages-5-6366F1?style=for-the-badge)
-![Theme](https://img.shields.io/badge/Theme-Dark%20%2F%20Light-0A0A0F?style=for-the-badge)
-
----
-
-## 🖥️ Pages
-
-| Page | File | Description |
-|------|------|-------------|
-| 🏠 Dashboard | `index.html` | Hero stats, live cluster topology canvas, activity feed |
-| 📁 File Manager | `files.html` | Google Drive-style grid/list, drag-and-drop upload with chunk animation |
-| 🖥️ Cluster Health | `cluster.html` | Node cards, replication matrix, engineer view, self-healing log |
-| ⚡ Chaos Studio | `chaos.html` | Kill nodes, inject corruption/latency, preset disaster scenarios |
-| ⚙️ Settings | `settings.html` | Lifecycle policies, zero-knowledge encryption, API keys, advanced tuning |
+[![Live on GitHub Pages](https://img.shields.io/badge/Live_Site-GitHub_Pages-10B981?style=for-the-badge&logo=github)](https://naresh-coderrr.github.io/vault-storage-platform/)
+[![Deploy on Vercel](https://img.shields.io/badge/Deploy_to-Vercel-000000?style=for-the-badge&logo=vercel)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnaresh-coderrr%2Fvault-storage-platform)
 
 ---
 
-## ✨ Features
+## 🌐 Live URLs
 
-- **Dark / Light theme** — glassmorphic design system with CSS custom properties
-- **Live cluster topology** — Canvas-animated node graph with data-flow particles
-- **Real-time activity feed** — Simulated WebSocket event stream
-- **Drag-and-drop upload** — Animated chunk routing visualization
-- **File detail drawer** — Slide-over with chunk breakdown, version history, sharing
-- **Chaos Engineering Studio** — Kill nodes, inject bit corruption, latency injection
-- **Replication Health Matrix** — Files × Nodes replica map with repair triggers
-- **Engineer View toggle** — Raw JSON, SHA-256 hash table, latency heatmap
-- **Zero-Knowledge Encryption** — AES-256-GCM browser-side toggle in Settings
-- **Smart Lifecycle Rules** — Hot/Cold tier automator configuration
-- **Fully responsive** — Mobile-first, keyboard accessible (WCAG AA)
-- **Undo toasts** — 5-second undo for destructive actions
-- **Universal search** — Ctrl+K command palette
+- 🚀 **Live Web App (GitHub Pages):** [https://naresh-coderrr.github.io/vault-storage-platform/](https://naresh-coderrr.github.io/vault-storage-platform/)
+- ⚡ **1-Click Vercel Deploy:** [Deploy on Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnaresh-coderrr%2Fvault-storage-platform)
+- 🐙 **Frontend Repository:** [github.com/naresh-coderrr/vault-storage-platform](https://github.com/naresh-coderrr/vault-storage-platform)
+- ⚙️ **Backend Repository:** [github.com/naresh-coderrr/vault-backend](https://github.com/naresh-coderrr/vault-backend)
+- ⚡ **Supabase Project:** `https://csrhmocmponregwceknr.supabase.co`
 
 ---
 
-## 🚀 Running Locally
+## 🖥️ Platform Pages
 
-### Option 1: Python (built-in, no install)
-```bash
-cd vault-website
-python -m http.server 8080
-# Open: http://localhost:8080
-```
-
-### Option 2: Node.js `serve`
-```bash
-npx serve . -p 8080
-# Open: http://localhost:8080
-```
-
-### Option 3: VS Code Live Server
-Install the **Live Server** extension → right-click `index.html` → Open with Live Server
+| Page | Path | Description |
+|---|---|---|
+| 🏠 **Homepage** | `index.html` | Interactive fault-tolerance sandbox, architecture overview & live node simulator |
+| 📊 **Dashboard** | `dashboard.html` | Live cluster topology canvas, real-time activity feed, and durability metrics |
+| 📁 **File Manager** | `files.html` | Multi-part chunk upload pipeline, SHA-256 integrity verification & downloads |
+| 🖥️ **Cluster Health** | `cluster.html` | Storage node cards (:9001, :9002, :9003) and chunk replica placement matrix |
+| ⚡ **Chaos Studio** | `chaos.html` | Kill nodes, inject silent bit-rot, network latency & watch sub-second auto-repair |
+| ⚙️ **Settings** | `settings.html` | Supabase cloud synchronization, durability policies & encryption keys |
+| 🔑 **Sign In** | `login.html` | 1-Click quick login profiles (Storage Architect, Chaos Engineer, Dev Operator) |
 
 ---
 
-## 🗄️ Backend & Database Setup
+## ✨ Core Engineering Capabilities
 
-See the [Database Setup Guide](../database-setup.md) for:
-- SQLite quickstart (zero config)
-- PostgreSQL production setup
-- Full schema with 7 tables
-- Connection pool configuration
-- Health check queries
-
-### Proposed Stack
-- **Frontend**: Pure HTML/CSS/JS (this repo) → migrate to Next.js + TailwindCSS
-- **Backend**: Node.js (Express) or Python (FastAPI)
-- **Database**: SQLite (dev) / PostgreSQL (production)
-- **Real-time**: WebSockets (socket.io)
-- **Storage Nodes**: Lightweight Express/FastAPI daemons on configurable ports
-
----
-
-## 🏗️ Architecture
-
-```
-[Web Dashboard UI] ←──REST + WebSockets──→ [Gateway API]
-                                                  │
-                          ┌───────────────────────┼────────────────────────┐
-                          ▼                       ▼                        ▼
-                   [Metadata DB]         [Heartbeat Daemon]       [Self-Healing Worker]
-                          │                       │                        │
-                    ┌─────┴─────────────────────┬─┘                       │
-                    ▼           ▼               ▼                          ▼
-               [Node :9001] [Node :9002]  [Node :9003]  ←── P2P Repair Streaming
-```
-
----
-
-## 🎨 Design System
-
-| Token | Dark | Light |
-|-------|------|-------|
-| Background | `#0A0A0F` | `#F8F9FF` |
-| Surface | `#12121A` | `#FFFFFF` |
-| Primary | `#6366F1` | `#6366F1` |
-| Success | `#22C55E` | `#16A34A` |
-| Warning | `#F59E0B` | `#D97706` |
-| Danger | `#EF4444` | `#DC2626` |
-
-Font: **Inter** · Icons: **Lucide** · Motion: 150–250ms purposeful transitions
+1. **Multi-Part Binary Chunking:** Files of any size are partitioned into 2MB binary buffers with individual block SHA-256 checksums.
+2. **N-Way Replication & Durability:** 3× default quorum ensures zero data loss even during simultaneous node outages.
+3. **Automated Self-Healing:** Background workers detect missing replicas and automatically re-replicate them to surviving peers in `< 2.0s`.
+4. **Anti-Bit-Rot Scrubber:** Continuous integrity verification catches silent magnetic bit flips on disk and restores corrupted blocks.
+5. **Supabase Cloud Sync:** Real-time PostgreSQL metadata indexing, access logging, and version tracking.
 
 ---
 
 ## 📄 License
-
 MIT © 2026 naresh-coderrr
