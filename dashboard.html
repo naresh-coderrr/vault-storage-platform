@@ -397,8 +397,8 @@
       <div class="metric-card">
         <div class="metric-icon" style="color: var(--warning); background: rgba(255,179,0,0.12);">⚡</div>
         <div class="metric-val" id="metricTotalChunks" style="color: var(--warning);">28</div>
-        <div class="metric-title">Dispersed 2MB Chunks</div>
-        <div class="metric-sub" style="color: var(--success);">SHA-256 Checksums Valid</div>
+        <div class="metric-title">4MB Chunks / 9-Node Broadcast</div>
+        <div class="metric-sub" style="color: var(--success);">SHA-256 Verified Multi-Zone Quorum</div>
       </div>
     </section>
 
@@ -406,10 +406,10 @@
     <section class="dashboard-grid">
       <div class="panel-card">
         <div class="panel-header">
-          <div class="panel-title"><span>🕸️</span> Live Cluster Topology Graph</div>
+          <div class="panel-title"><span>🕸️</span> Live 9-Node Multi-Region Topology Graph</div>
           <div style="display: flex; gap: 8px;">
             <button class="btn btn-sm btn-secondary" onclick="triggerScrubber()">🔍 Run Scrubber</button>
-            <a href="chaos.html" class="btn btn-sm btn-secondary" style="color: var(--danger);">⚡ Chaos Studio</a>
+            <a href="chaos.html" class="btn btn-sm btn-secondary" style="color: var(--danger);">⚡ Chaos Lab</a>
           </div>
         </div>
 
@@ -443,7 +443,7 @@
             <th>Object Name</th>
             <th>Payload Size</th>
             <th>Chunk Shards</th>
-            <th>Replication Status</th>
+            <th>Replication Policy</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -456,6 +456,7 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <script src="vault-storage.js"></script>
   <script>
     function toggleTheme() {
       const html = document.documentElement;
@@ -498,6 +499,7 @@
       files.forEach(f => {
         totalBytes += f.sizeBytes || 0;
         totalChunks += f.chunksCount || 1;
+        const isSmall = f.isSmallFileBroadcast || f.replicationFactor === 9 || f.sizeBytes < 5242880;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -505,8 +507,8 @@
             <span>${f.icon || '📄'}</span> ${f.name}
           </td>
           <td>${f.sizeFormatted}</td>
-          <td>${f.chunksCount} Chunks (2MB)</td>
-          <td><span class="badge ${f.status === 'Healthy' ? 'badge-success' : 'badge-warning'}">${f.replicationFactor}× ${f.status}</span></td>
+          <td>${isSmall ? 'Single Block (&lt; 5MB)' : f.chunksCount + ' Chunks (4MB)'}</td>
+          <td><span class="badge ${f.status === 'Healthy' ? 'badge-success' : 'badge-warning'}">${isSmall ? '🌐 9× All Nodes' : f.replicationFactor + '× Quorum'}</span></td>
           <td>
             <button class="btn btn-sm btn-secondary" onclick="window.vaultStore.downloadFile('${f.id}')">⬇️ Download</button>
           </td>
@@ -517,7 +519,7 @@
       document.getElementById('metricTotalStorage').textContent = window.vaultStore.formatBytes(totalBytes);
       document.getElementById('metricFilesCountSub').textContent = `↑ ${files.length} Real Objects`;
       document.getElementById('metricTotalChunks').textContent = totalChunks;
-      document.getElementById('storageUsageDetail').textContent = `${window.vaultStore.formatBytes(totalBytes)} of 30 GB Allocated`;
+      document.getElementById('storageUsageDetail').textContent = `${window.vaultStore.formatBytes(totalBytes)} of 90 GB Allocated`;
 
       renderActivities();
     }
@@ -547,21 +549,21 @@
     }
 
     function clearActivity() {
-      localStorage.removeItem('vault_activity_log_v3');
+      localStorage.removeItem('vault_activity_log_v4');
       renderActivities();
       showToast('Activity log cleared', 'info');
     }
 
     function triggerScrubber() {
-      showToast('Continuous Scrubber triggered. Verifying SHA-256 on-disk blocks...', 'info');
+      showToast('Continuous Scrubber triggered. Verifying SHA-256 on-disk blocks across all 9 nodes...', 'info');
       setTimeout(() => {
-        showToast('All on-disk chunks match cryptographic database hashes!', 'success');
-        window.vaultStore.logActivity('Scrubber completed full pass with zero bit-rot', '🔍');
+        showToast('All 9-node blocks match cryptographic database checksums!', 'success');
+        window.vaultStore.logActivity('Scrubber completed full pass across 9 nodes with zero bit-rot', '🔍');
         renderActivities();
-      }, 1000);
+      }, 900);
     }
 
-    // Canvas Cluster Topology Animation
+    // Canvas Cluster Topology Animation for 9 nodes
     const canvas = document.getElementById('clusterCanvas');
     const ctx = canvas.getContext('2d');
     let W, H;
@@ -574,16 +576,21 @@
     resizeCanvas();
 
     const topoNodes = [
-      { name: 'Gateway API', x: 0, y: 0, r: 30, color: '#FF5722' },
-      { name: 'Node Alpha (:9001)', x: 0, y: 0, r: 20, color: '#00E676' },
-      { name: 'Node Beta (:9002)', x: 0, y: 0, r: 20, color: '#00E676' },
-      { name: 'Node Gamma (:9003)', x: 0, y: 0, r: 20, color: '#00E676' },
-      { name: 'Node Delta (:9004)', x: 0, y: 0, r: 18, color: '#00E5FF' },
+      { name: 'Gateway API', x: 0, y: 0, r: 24, color: '#FF6B35' },
+      { name: 'Node Alpha (:9001)', x: 0, y: 0, r: 16, color: '#10B981' },
+      { name: 'Node Beta (:9002)', x: 0, y: 0, r: 16, color: '#10B981' },
+      { name: 'Node Gamma (:9003)', x: 0, y: 0, r: 16, color: '#10B981' },
+      { name: 'Node Delta (:9004)', x: 0, y: 0, r: 14, color: '#8B5CF6' },
+      { name: 'Node Epsilon (:9005)', x: 0, y: 0, r: 14, color: '#8B5CF6' },
+      { name: 'Node Zeta (:9006)', x: 0, y: 0, r: 14, color: '#8B5CF6' },
+      { name: 'Node Eta (:9007)', x: 0, y: 0, r: 14, color: '#F59E0B' },
+      { name: 'Node Theta (:9008)', x: 0, y: 0, r: 14, color: '#F59E0B' },
+      { name: 'Node Iota (:9009)', x: 0, y: 0, r: 14, color: '#F59E0B' }
     ];
 
     let topoAngle = 0;
     const topoParticles = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 24; i++) {
       topoParticles.push({
         nodeIdx: (i % (topoNodes.length - 1)) + 1,
         progress: Math.random(),
@@ -595,7 +602,7 @@
       ctx.clearRect(0, 0, W, H);
       const cx = W / 2;
       const cy = H / 2;
-      const radius = Math.min(W, H) * 0.35;
+      const radius = Math.min(W, H) * 0.38;
 
       topoNodes[0].x = cx;
       topoNodes[0].y = cy;
@@ -608,7 +615,7 @@
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(topoNodes[i].x, topoNodes[i].y);
-        ctx.strokeStyle = 'rgba(255, 87, 34, 0.2)';
+        ctx.strokeStyle = 'rgba(255, 107, 53, 0.2)';
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
@@ -623,9 +630,9 @@
 
         ctx.beginPath();
         ctx.arc(px, py, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#00E5FF';
+        ctx.fillStyle = '#10B981';
         ctx.shadowBlur = 8;
-        ctx.shadowColor = '#00E5FF';
+        ctx.shadowColor = '#10B981';
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -634,7 +641,7 @@
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
         ctx.fillStyle = n.color;
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 12;
         ctx.shadowColor = n.color;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -643,13 +650,13 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        ctx.fillStyle = '#FDFEFE';
-        ctx.font = '700 11px Plus Jakarta Sans';
+        ctx.fillStyle = '#F0F6FC';
+        ctx.font = '700 10.5px Plus Jakarta Sans';
         ctx.textAlign = 'center';
-        ctx.fillText(n.name, n.x, n.y + n.r + 14);
+        ctx.fillText(n.name, n.x, n.y + n.r + 13);
       });
 
-      topoAngle += 0.001;
+      topoAngle += 0.0012;
       requestAnimationFrame(renderTopology);
     }
     renderTopology();

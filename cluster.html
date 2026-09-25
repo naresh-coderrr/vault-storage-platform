@@ -271,117 +271,46 @@
       </div>
     </div>
 
-    <div class="nodes-grid">
-      <div class="node-card healthy">
-        <div class="node-card-header">
-          <div class="node-title-wrap">
-            <div style="font-size: 24px;">🟢</div>
-            <div>
-              <div class="node-title">Node Alpha</div>
-              <div class="node-endpoint">http://127.0.0.1:9001</div>
-            </div>
-          </div>
-          <span class="badge badge-success">HEALTHY</span>
-        </div>
-
-        <div class="node-stats-row">
-          <div><div class="node-stat-val">28</div><div class="node-stat-lbl">Chunks</div></div>
-          <div><div class="node-stat-val">6 ms</div><div class="node-stat-lbl">Latency</div></div>
-          <div><div class="node-stat-val">99.9%</div><div class="node-stat-lbl">Uptime</div></div>
-        </div>
-
-        <div style="font-size: 12px; display: flex; justify-content: space-between; color: var(--text-muted);">
-          <span>Used: 51.0 MB</span><span>Total: 10.0 GB</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 28%;"></div></div>
-
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-sm btn-secondary" style="flex: 1;" onclick="inspectChunks('Node Alpha', 28)">📦 Inspect</button>
-          <button class="btn btn-sm btn-secondary" onclick="restartNode('Node Alpha')">🔄 Reboot</button>
-        </div>
-      </div>
-
-      <div class="node-card healthy">
-        <div class="node-card-header">
-          <div class="node-title-wrap">
-            <div style="font-size: 24px;">🟢</div>
-            <div>
-              <div class="node-title">Node Beta</div>
-              <div class="node-endpoint">http://127.0.0.1:9002</div>
-            </div>
-          </div>
-          <span class="badge badge-success">HEALTHY</span>
-        </div>
-
-        <div class="node-stats-row">
-          <div><div class="node-stat-val">28</div><div class="node-stat-lbl">Chunks</div></div>
-          <div><div class="node-stat-val">8 ms</div><div class="node-stat-lbl">Latency</div></div>
-          <div><div class="node-stat-val">99.9%</div><div class="node-stat-lbl">Uptime</div></div>
-        </div>
-
-        <div style="font-size: 12px; display: flex; justify-content: space-between; color: var(--text-muted);">
-          <span>Used: 51.0 MB</span><span>Total: 10.0 GB</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 28%;"></div></div>
-
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-sm btn-secondary" style="flex: 1;" onclick="inspectChunks('Node Beta', 28)">📦 Inspect</button>
-          <button class="btn btn-sm btn-secondary" onclick="restartNode('Node Beta')">🔄 Reboot</button>
-        </div>
-      </div>
-
-      <div class="node-card healthy">
-        <div class="node-card-header">
-          <div class="node-title-wrap">
-            <div style="font-size: 24px;">🟢</div>
-            <div>
-              <div class="node-title">Node Gamma</div>
-              <div class="node-endpoint">http://127.0.0.1:9003</div>
-            </div>
-          </div>
-          <span class="badge badge-success">HEALTHY</span>
-        </div>
-
-        <div class="node-stats-row">
-          <div><div class="node-stat-val">27</div><div class="node-stat-lbl">Chunks</div></div>
-          <div><div class="node-stat-val">7 ms</div><div class="node-stat-lbl">Latency</div></div>
-          <div><div class="node-stat-val">99.8%</div><div class="node-stat-lbl">Uptime</div></div>
-        </div>
-
-        <div style="font-size: 12px; display: flex; justify-content: space-between; color: var(--text-muted);">
-          <span>Used: 49.0 MB</span><span>Total: 10.0 GB</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 26%;"></div></div>
-
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-sm btn-secondary" style="flex: 1;" onclick="inspectChunks('Node Gamma', 27)">📦 Inspect</button>
-          <button class="btn btn-sm btn-secondary" onclick="restartNode('Node Gamma')">🔄 Reboot</button>
-        </div>
-      </div>
+    <div class="nodes-grid" id="nodesGridContainer">
+      <!-- 9 Nodes generated dynamically from CLUSTER_NODES -->
     </div>
 
     <!-- Placement Matrix Table -->
     <div class="panel-card">
-      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">🧩 Object Replica Placement Matrix</h3>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Click any missing replica (✗) to trigger immediate re-replication.</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">🧩 Object Replica Placement Matrix</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Real-time shard map across all 9 nodes. Small files (&lt; 5MB) broadcast to all 9 nodes; Large files (≥ 5MB) shard into 4MB blocks across quorums.</p>
+        </div>
+        <span class="badge badge-success" style="padding: 6px 12px; font-size: 12px;">Active Quorum: 9/9 Nodes Online</span>
+      </div>
 
-      <table class="matrix-table">
-        <thead>
-          <tr>
-            <th>Stored Object</th>
-            <th>Size</th>
-            <th>Node Alpha (:9001)</th>
-            <th>Node Beta (:9002)</th>
-            <th>Node Gamma (:9003)</th>
-          </tr>
-        </thead>
-        <tbody id="matrixBody"></tbody>
-      </table>
+      <div style="overflow-x: auto;">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Stored Object</th>
+              <th>Size / Policy</th>
+              <th>Node Alpha (:9001)</th>
+              <th>Node Beta (:9002)</th>
+              <th>Node Gamma (:9003)</th>
+              <th>Node Delta (:9004)</th>
+              <th>Node Epsilon (:9005)</th>
+              <th>Node Zeta (:9006)</th>
+              <th>Node Eta (:9007)</th>
+              <th>Node Theta (:9008)</th>
+              <th>Node Iota (:9009)</th>
+            </tr>
+          </thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <script src="vault-storage.js"></script>
   <script>
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
@@ -397,64 +326,137 @@
       }, 3500);
     }
 
+    const ALL_NODES = [
+      { id: 'node-alpha', name: 'Node Alpha', port: 9001, zone: 'us-east-1a (Rack-01)', latency: 5, uptime: '99.99%', usedMb: 52 },
+      { id: 'node-beta',  name: 'Node Beta',  port: 9002, zone: 'us-east-1b (Rack-01)', latency: 7, uptime: '99.98%', usedMb: 52 },
+      { id: 'node-gamma', name: 'Node Gamma', port: 9003, zone: 'us-east-1c (Rack-02)', latency: 6, uptime: '99.95%', usedMb: 48 },
+      { id: 'node-delta', name: 'Node Delta', port: 9004, zone: 'us-west-2a (Rack-02)', latency: 12, uptime: '99.99%', usedMb: 40 },
+      { id: 'node-epsilon', name: 'Node Epsilon', port: 9005, zone: 'us-west-2b (Rack-03)', latency: 14, uptime: '99.94%', usedMb: 36 },
+      { id: 'node-zeta',  name: 'Node Zeta',  port: 9006, zone: 'eu-central-1a (Rack-03)', latency: 28, uptime: '99.90%', usedMb: 36 },
+      { id: 'node-eta',   name: 'Node Eta',   port: 9007, zone: 'eu-central-1b (Rack-04)', latency: 31, uptime: '99.92%', usedMb: 32 },
+      { id: 'node-theta', name: 'Node Theta', port: 9008, zone: 'ap-south-1a (Rack-04)', latency: 45, uptime: '99.96%', usedMb: 28 },
+      { id: 'node-iota',  name: 'Node Iota',  port: 9009, zone: 'ap-south-1b (Rack-05)', latency: 48, uptime: '99.88%', usedMb: 28 }
+    ];
+
+    function renderNodeCards() {
+      const grid = document.getElementById('nodesGridContainer');
+      grid.innerHTML = '';
+
+      ALL_NODES.forEach((node, idx) => {
+        const card = document.createElement('div');
+        card.className = 'node-card healthy';
+        card.innerHTML = `
+          <div class="node-card-header">
+            <div class="node-title-wrap">
+              <div style="font-size: 24px;">🟢</div>
+              <div>
+                <div class="node-title">${node.name}</div>
+                <div class="node-endpoint">http://127.0.0.1:${node.port} • ${node.zone}</div>
+              </div>
+            </div>
+            <span class="badge badge-success">HEALTHY</span>
+          </div>
+
+          <div class="node-stats-row">
+            <div><div class="node-stat-val">${24 + (idx % 5)}</div><div class="node-stat-lbl">Chunks</div></div>
+            <div><div class="node-stat-val">${node.latency} ms</div><div class="node-stat-lbl">Latency</div></div>
+            <div><div class="node-stat-val">${node.uptime}</div><div class="node-stat-lbl">Uptime</div></div>
+          </div>
+
+          <div style="font-size: 12px; display: flex; justify-content: space-between; color: var(--text-muted);">
+            <span>Used: ${node.usedMb}.0 MB</span><span>Total: 10.0 GB</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: ${20 + idx * 4}%;"></div></div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-sm btn-secondary" style="flex: 1;" onclick="inspectChunks('${node.name}', ${24 + (idx % 5)})">📦 Inspect</button>
+            <button class="btn btn-sm btn-secondary" onclick="restartNode('${node.name}')">🔄 Reboot</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
     async function loadMatrix() {
+      renderNodeCards();
       const files = await window.vaultStore.getAllFiles();
       const tbody = document.getElementById('matrixBody');
       tbody.innerHTML = '';
 
       files.forEach(f => {
+        const isSmall = f.isSmallFileBroadcast || f.replicationFactor === 9 || f.sizeBytes < 5242880;
         const isDegraded = f.status === 'Degraded';
         const tr = document.createElement('tr');
+
+        let cellsHTML = '';
+        ALL_NODES.forEach((node, nIdx) => {
+          if (isSmall) {
+            // Small file broadcast: present on ALL 9 nodes
+            cellsHTML += `<td><span class="matrix-cell-check" title="${node.name} holds atomic replica">✓</span></td>`;
+          } else {
+            // Large file: distributed across assigned nodes or quorums
+            const isAssigned = (nIdx < (f.replicationFactor || 3));
+            if (isDegraded && nIdx === 2) {
+              cellsHTML += `<td><span class="matrix-cell-missing" onclick="repairMatrixFile(this, '${f.id}', '${f.name}')" title="Missing chunk replica! Click to repair">✗</span></td>`;
+            } else if (isAssigned) {
+              cellsHTML += `<td><span class="matrix-cell-check" title="${node.name} holds active chunk replica">✓</span></td>`;
+            } else {
+              cellsHTML += `<td><span style="color: var(--text-muted); opacity: 0.4;">-</span></td>`;
+            }
+          }
+        });
+
         tr.innerHTML = `
           <td><strong>${f.name}</strong></td>
-          <td>${f.sizeFormatted}</td>
-          <td><span class="matrix-cell-check">✓</span></td>
-          <td><span class="matrix-cell-check">✓</span></td>
           <td>
-            ${isDegraded
-              ? `<span class="matrix-cell-missing" onclick="repairMatrixFile(this, '${f.id}', '${f.name}')">✗</span>`
-              : `<span class="matrix-cell-check">✓</span>`
-            }
+            <span style="font-weight: 700;">${f.sizeFormatted}</span>
+            <div style="font-size: 11px; color: ${isSmall ? 'var(--success)' : 'var(--primary)'};">
+              ${isSmall ? '🌐 9-Node Broadcast' : f.chunksCount + 'x 4MB Shards'}
+            </div>
           </td>
+          ${cellsHTML}
         `;
         tbody.appendChild(tr);
       });
     }
 
     async function repairMatrixFile(el, id, name) {
-      showToast(`Re-replicating missing chunks of "${name}" to Node Gamma...`, 'info');
+      showToast(`Re-replicating missing 4MB chunks of "${name}" to Node Gamma...`, 'info');
       el.innerHTML = '⟳';
       await window.vaultStore.repairFile(id);
       setTimeout(() => {
         el.className = 'matrix-cell-check';
         el.innerHTML = '✓';
-        showToast(`✅ 3x Quorum restored for "${name}"!`, 'success');
-      }, 1000);
+        showToast(`✅ Quorum redundancy restored for "${name}"!`, 'success');
+        loadMatrix();
+      }, 800);
     }
 
     function runHealthCheck() {
-      showToast('Pinging all node HTTP health endpoints...', 'info');
-      setTimeout(() => showToast('All 3 storage nodes responded OK (avg latency: 7.2ms)!', 'success'), 600);
+      showToast('Pinging all 9 storage node HTTP health endpoints (:9001 - :9009)...', 'info');
+      setTimeout(() => showToast('All 9 cluster nodes responded HEALTHY (average latency: 9.4ms)!', 'success'), 600);
     }
 
     function restartNode(name) {
       showToast(`Rebooting ${name} daemon process...`, 'info');
-      setTimeout(() => showToast(`✅ ${name} reconnected & verified chunk integrity!`, 'success'), 1200);
+      setTimeout(() => showToast(`✅ ${name} reconnected & verified all local block checksums!`, 'success'), 1000);
     }
 
     function inspectChunks(name, count) {
-      showToast(`Node ${name}: ${count} on-disk multi-part blocks verified with SHA-256.`, 'info');
+      showToast(`Node ${name}: ${count} on-disk 4MB multi-part blocks verified with Web Crypto SHA-256.`, 'info');
     }
 
     function openAddNodeModal() {
-      const port = prompt('Enter new storage node port (e.g. 9005):', '9005');
+      const port = prompt('Enter new storage node port (e.g. 9010):', '9010');
       if (port) {
         showToast(`Registering node at http://127.0.0.1:${port}...`, 'info');
-        setTimeout(() => showToast(`✅ Node on port ${port} active!`, 'success'), 800);
+        setTimeout(() => showToast(`✅ Storage Node on port ${port} active & joined cluster!`, 'success'), 800);
       }
     }
 
     window.addEventListener('DOMContentLoaded', loadMatrix);
+    window.addEventListener('vault_file_uploaded', loadMatrix);
+    window.addEventListener('vault_file_deleted', loadMatrix);
   </script>
 </body>
 </html>

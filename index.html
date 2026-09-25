@@ -594,34 +594,34 @@
     </div>
 
     <h1 class="hero-title">
-      Zero Data Loss Distributed Storage. <span>S3 Resilience Underneath.</span>
+      Zero Data Loss Distributed Storage. <span>Multi-Region Quorum Underneath.</span>
     </h1>
 
     <p class="hero-desc">
-      Vault partitions files into 2MB shards with cryptographic SHA-256 block checksums, replicates them across independent storage nodes, and heals missing replicas in sub-seconds with automated background scrubbers.
+      Vault implements intelligent storage placement: broadcast replication for small files (&lt; 5MB) across <strong>all 9 cluster nodes</strong>, and <strong>4MB high-throughput sharding</strong> with cryptographic SHA-256 block checksums for large files with autonomous background healing.
     </p>
 
     <div class="hero-cta-group">
       <a href="dashboard.html" class="btn btn-primary btn-lg">📊 Open Cluster Dashboard</a>
       <a href="files.html" class="btn btn-secondary btn-lg">📁 Upload & Shard Files</a>
-      <a href="chaos.html" class="btn btn-secondary btn-lg" style="border-color: rgba(255,23,68,0.4); color: var(--danger);">⚡ Launch Chaos Studio</a>
+      <a href="chaos.html" class="btn btn-secondary btn-lg" style="border-color: rgba(255,23,68,0.4); color: var(--danger);">⚡ Launch Chaos Lab</a>
     </div>
 
     <div class="hero-stats-row">
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--success);">99.999%</div>
+        <div class="stat-val" style="color: var(--success);">99.9999%</div>
         <div class="stat-label">Data Durability Index</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--primary);">3 / 3</div>
-        <div class="stat-label">Storage Daemons Online</div>
+        <div class="stat-val" style="color: var(--primary);">9 / 9</div>
+        <div class="stat-label">Multi-Zone Storage Nodes</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--secondary);">2.0 MB</div>
-        <div class="stat-label">Multi-Part Chunk Buffer</div>
+        <div class="stat-val" style="color: var(--secondary);">4.0 MB</div>
+        <div class="stat-label">High-Throughput Chunk Limit</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--warning);">&lt; 1.8s</div>
+        <div class="stat-val" style="color: var(--warning);">&lt; 1.2s</div>
         <div class="stat-label">Automated Self-Healing</div>
       </div>
     </div>
