@@ -1320,6 +1320,7 @@ const NODES = ['Node-A','Node-B','Node-C','Node-D','Node-E'];
    ================================================================ */
 window.addEventListener('DOMContentLoaded', () => {
   renderFiles();
+  fetchRealFiles();
   initDragDrop();
   initSearch();
   initKeyboard();
@@ -1327,11 +1328,51 @@ window.addEventListener('DOMContentLoaded', () => {
   animateStorage();
 });
 
+async function fetchRealFiles() {
+  try {
+    const res = await fetch('/api/v1/objects');
+    if (res.ok) {
+      const data = await res.json();
+      const rawList = Array.isArray(data) ? data : (data.value || []);
+      if (rawList.length > 0) {
+        FILES = rawList.map(f => {
+          const ext = f.filename.split('.').pop().toLowerCase();
+          return {
+            id: f.id,
+            name: f.filename,
+            ext: ext,
+            size: formatBytes(f.total_size),
+            sizeBytes: f.total_size,
+            rep: f.replication_factor,
+            status: f.status === 'ACTIVE' ? 'OK' : f.status,
+            date: f.created_at ? f.created_at.split(' ')[0] : '2026-09-26',
+            chunks: f.total_chunks,
+            folder: 'root',
+            hash: f.file_hash
+          };
+        });
+        renderFiles();
+      }
+    }
+  } catch (e) {
+    console.log('Backend API offline or using seeded default files', e);
+  }
+}
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 function animateStorage() {
-  // Small startup animation
   const bar = document.getElementById('storageBar');
-  bar.style.width = '0';
-  setTimeout(() => { bar.style.width = '68%'; bar.style.transition = 'width 1.2s cubic-bezier(0.4,0,0.2,1)'; }, 200);
+  if (bar) {
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = '42%'; bar.style.transition = 'width 1.2s cubic-bezier(0.4,0,0.2,1)'; }, 200);
+  }
 }
 
 /* ================================================================
@@ -1917,7 +1958,10 @@ function ctxDelete()   { if (ctxTargetId) deleteFile(ctxTargetId); }
 function downloadFile(e, id) {
   if (e) e.stopPropagation();
   const file = FILES.find(f => f.id === id);
-  if (file) showToast('⬇️', `Downloading ${file.name}…`, 'info');
+  if (file) {
+    showToast('⬇️', `Downloading ${file.name}…`, 'info');
+    window.location.href = `/api/v1/objects/${id}/download`;
+  }
 }
 
 function shareFile(e, id) {
