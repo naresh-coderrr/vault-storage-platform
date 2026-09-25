@@ -6,61 +6,61 @@
   <title>Vault — Fault-Tolerant Distributed Object Storage Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="vault-storage.js"></script>
   <style>
     /* ============================================================
-       VAULT MODERN DESIGN SYSTEM — VIBRANT & SPACIOUS
+       VAULT DISTINCTIVE PALETTE — WARM OBSIDIAN & SOLAR TANGERINE & EMERALD MINT
        ============================================================ */
     :root {
-      --primary: #8B5CF6;
-      --primary-hover: #7C3AED;
-      --primary-glow: rgba(139, 92, 246, 0.35);
-      --secondary: #06B6D4;
-      --success: #10B981;
-      --warning: #F59E0B;
-      --danger: #F43F5E;
-      --info: #3B82F6;
+      --primary: #FF5722;          /* Solar Coral / Tangerine Flame */
+      --primary-hover: #F4511E;
+      --primary-glow: rgba(255, 87, 34, 0.4);
+      --secondary: #00E5FF;        /* Electric Holographic Cyan */
+      --accent: #9C27B0;           /* Royal Amethyst Violet */
+      --success: #00E676;          /* Mint Emerald */
+      --warning: #FFB300;          /* Solar Amber Gold */
+      --danger: #FF1744;           /* Radiant Crimson */
+      --info: #00B0FF;
 
-      /* Refined Slate Theme (Not dull black/dark blue) */
-      --bg: #0B0F19;
-      --bg-card: rgba(18, 24, 38, 0.75);
-      --bg-card-hover: rgba(26, 34, 52, 0.9);
-      --surface: #131B2E;
+      /* Dark: Luxurious Warm Espresso Slate & Obsidian */
+      --bg: #0C0E14;
+      --bg-card: rgba(22, 26, 38, 0.82);
+      --bg-card-hover: rgba(30, 35, 52, 0.95);
+      --surface: #151824;
       --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(139, 92, 246, 0.3);
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-      --text-dim: #64748B;
-      --glass: rgba(15, 23, 42, 0.65);
+      --surface-border-hover: rgba(255, 87, 34, 0.4);
+      --text: #FDFEFE;
+      --text-muted: #A0A5B5;
+      --text-dim: #6B7280;
+      --glass: rgba(18, 21, 31, 0.75);
       --glass-blur: blur(24px);
-      --gradient-brand: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
-      --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-      --gradient-emerald: linear-gradient(135deg, #10B981 0%, #059669 100%);
-      --shadow-glow: 0 10px 40px -10px rgba(139, 92, 246, 0.3);
-      --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.35);
+      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #E91E63 50%, #9C27B0 100%);
+      --gradient-emerald: linear-gradient(135deg, #00E676 0%, #00B0FF 100%);
+      --gradient-gold: linear-gradient(135deg, #FFB300 0%, #FF5722 100%);
+      --shadow-glow: 0 10px 40px -8px rgba(255, 87, 34, 0.35);
+      --shadow-card: 0 14px 40px -6px rgba(0, 0, 0, 0.45);
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
       --radius-xl: 28px;
-      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font: 'Plus Jakarta Sans', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
 
     [data-theme="light"] {
-      --bg: #F8FAFC;
-      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg: #FBF9F5;
+      --bg-card: rgba(255, 255, 255, 0.92);
       --bg-card-hover: #FFFFFF;
       --surface: #FFFFFF;
-      --surface-border: rgba(15, 23, 42, 0.08);
-      --surface-border-hover: rgba(139, 92, 246, 0.4);
-      --text: #0F172A;
-      --text-muted: #475569;
-      --text-dim: #94A3B8;
-      --glass: rgba(255, 255, 255, 0.8);
-      --gradient-brand: linear-gradient(135deg, #7C3AED 0%, #2563EB 50%, #0891B2 100%);
-      --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.7) 100%);
-      --shadow-glow: 0 12px 32px -8px rgba(124, 58, 237, 0.25);
+      --surface-border: rgba(12, 14, 20, 0.08);
+      --surface-border-hover: rgba(255, 87, 34, 0.45);
+      --text: #11141D;
+      --text-muted: #525866;
+      --text-dim: #8A92A6;
+      --glass: rgba(255, 255, 255, 0.88);
+      --gradient-brand: linear-gradient(135deg, #FF5722 0%, #D81B60 50%, #8E24AA 100%);
+      --shadow-glow: 0 10px 32px -6px rgba(255, 87, 34, 0.25);
       --shadow-card: 0 10px 30px -4px rgba(0, 0, 0, 0.06);
     }
 
@@ -75,7 +75,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Ambient background lighting */
+    /* Ambient Warm Orbs */
     .ambient-bg {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -86,27 +86,26 @@
     .ambient-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.25;
+      filter: blur(140px);
+      opacity: 0.28;
       animation: float 20s infinite alternate ease-in-out;
     }
-    .orb-1 { width: 600px; height: 600px; background: #8B5CF6; top: -100px; left: -100px; }
-    .orb-2 { width: 500px; height: 500px; background: #06B6D4; top: 30%; right: -150px; animation-delay: -5s; }
-    .orb-3 { width: 700px; height: 700px; background: #10B981; bottom: -200px; left: 20%; animation-delay: -10s; }
+    .orb-1 { width: 600px; height: 600px; background: #FF5722; top: -100px; left: -100px; }
+    .orb-2 { width: 500px; height: 500px; background: #9C27B0; top: 30%; right: -150px; animation-delay: -5s; }
+    .orb-3 { width: 700px; height: 700px; background: #00E676; bottom: -200px; left: 20%; animation-delay: -10s; }
 
     @keyframes float {
       0% { transform: translateY(0px) scale(1); }
       100% { transform: translateY(40px) scale(1.08); }
     }
 
-    /* Navigation */
+    /* Navbar */
     .navbar {
       position: sticky;
       top: 0;
       z-index: 100;
       background: var(--glass);
       backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--surface-border);
       padding: 16px 32px;
       display: flex;
@@ -123,14 +122,14 @@
       color: var(--text);
     }
     .brand-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 12px;
       background: var(--gradient-brand);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       box-shadow: var(--shadow-glow);
     }
     .brand-title {
@@ -143,12 +142,12 @@
     }
     .brand-badge {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 3px 8px;
       border-radius: 99px;
-      background: rgba(139, 92, 246, 0.15);
+      background: rgba(255, 87, 34, 0.15);
       color: var(--primary);
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      border: 1px solid rgba(255, 87, 34, 0.35);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -182,7 +181,7 @@
       justify-content: center;
       gap: 8px;
       font-family: var(--font);
-      font-weight: 600;
+      font-weight: 700;
       font-size: 14px;
       padding: 10px 20px;
       border-radius: 10px;
@@ -198,7 +197,7 @@
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 30px -6px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 14px 32px -6px rgba(255, 87, 34, 0.5);
     }
     .btn-secondary {
       background: var(--bg-card);
@@ -242,17 +241,16 @@
       gap: 8px;
       padding: 6px 16px;
       border-radius: 99px;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(0, 230, 118, 0.12);
+      border: 1px solid rgba(0, 230, 118, 0.35);
       color: var(--success);
       font-size: 13px;
       font-weight: 700;
       margin-bottom: 24px;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 230, 118, 0.15);
     }
     .hero-badge-pulse {
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       background: var(--success);
       border-radius: 50%;
       box-shadow: 0 0 10px var(--success);
@@ -281,7 +279,7 @@
     .hero-desc {
       font-size: clamp(16px, 2vw, 20px);
       color: var(--text-muted);
-      max-width: 760px;
+      max-width: 780px;
       margin: 0 auto 36px;
       font-weight: 400;
     }
@@ -330,7 +328,7 @@
       margin-top: 4px;
     }
 
-    /* Live Interactive Sandbox Widget */
+    /* Sandbox Simulator */
     .sandbox-section {
       max-width: 1200px;
       margin: 0 auto 80px;
@@ -348,7 +346,7 @@
     .sandbox-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
+      top: 0; left: 0; right: 0; height: 4px;
       background: var(--gradient-brand);
     }
     .sandbox-header {
@@ -374,7 +372,6 @@
       margin-top: 4px;
     }
 
-    /* Interactive Node Cluster Visualizer */
     .cluster-preview-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -387,10 +384,8 @@
       border-radius: var(--radius-md);
       padding: 20px;
       transition: all 0.3s ease;
-      position: relative;
     }
     .node-preview-card.healthy { border-left: 4px solid var(--success); }
-    .node-preview-card.degraded { border-left: 4px solid var(--warning); }
     .node-preview-card.offline { border-left: 4px solid var(--danger); opacity: 0.65; }
     .node-head {
       display: flex;
@@ -405,9 +400,8 @@
       padding: 3px 8px;
       border-radius: 99px;
     }
-    .badge-healthy { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .badge-degraded { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-    .badge-offline { background: rgba(244, 63, 94, 0.15); color: var(--danger); }
+    .badge-healthy { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+    .badge-offline { background: rgba(255, 23, 68, 0.15); color: var(--danger); }
     .node-meta {
       font-size: 12px;
       color: var(--text-muted);
@@ -428,7 +422,6 @@
       height: 100%;
       background: var(--gradient-brand);
       border-radius: 99px;
-      transition: width 0.4s ease;
     }
     .node-action-btn {
       width: 100%;
@@ -443,34 +436,38 @@
       transition: all 0.2s;
     }
     .node-action-btn:hover {
-      background: rgba(244, 63, 94, 0.15);
+      background: rgba(255, 23, 68, 0.15);
       border-color: var(--danger);
       color: var(--danger);
     }
 
-    /* Simulation Control Bar */
     .sim-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(0,0,0,0.25);
+      background: rgba(0,0,0,0.3);
       padding: 16px 20px;
       border-radius: var(--radius-md);
       border: 1px solid var(--surface-border);
       flex-wrap: wrap;
       gap: 12px;
     }
-    .sim-info {
-      font-size: 13px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+
+    /* SDK Showcase */
+    .sdk-section {
+      max-width: 1200px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
     }
-    .sim-btn-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .code-box {
+      background: #06080D;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #A0A5B5;
+      overflow-x: auto;
     }
 
     /* Features Grid */
@@ -487,7 +484,7 @@
     .section-badge {
       color: var(--primary);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 12px;
@@ -497,10 +494,6 @@
       font-weight: 800;
       letter-spacing: -1px;
       margin-bottom: 16px;
-    }
-    .section-desc {
-      font-size: 16px;
-      color: var(--text-muted);
     }
     .features-grid {
       display: grid;
@@ -513,7 +506,6 @@
       border-radius: var(--radius-lg);
       padding: 32px;
       transition: all 0.3s ease;
-      position: relative;
     }
     .feature-card:hover {
       transform: translateY(-6px);
@@ -521,56 +513,17 @@
       box-shadow: var(--shadow-card);
     }
     .feature-icon-wrap {
-      width: 52px;
-      height: 52px;
+      width: 52px; height: 52px;
       border-radius: 14px;
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.25);
+      background: rgba(255, 87, 34, 0.12);
+      border: 1px solid rgba(255, 87, 34, 0.25);
       color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 24px;
       margin-bottom: 20px;
     }
-    .feature-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .feature-desc {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* Supabase Cloud Banner */
-    .supabase-banner {
-      max-width: 1200px;
-      margin: 0 auto 100px;
-      padding: 40px;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.08) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: var(--radius-xl);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 24px;
-    }
-    .supabase-text h3 {
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .supabase-text p {
-      color: var(--text-muted);
-      font-size: 14px;
-      max-width: 600px;
-    }
+    .feature-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+    .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
     /* Footer */
     .footer {
@@ -588,65 +541,33 @@
       flex-wrap: wrap;
       gap: 20px;
     }
-    .footer-copy {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-    .footer-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s;
-    }
+    .footer-copy { font-size: 14px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
     .footer-links a:hover { color: var(--text); }
 
-    /* Toast container */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
     .toast {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 14px 20px;
-      color: var(--text);
-      font-size: 14px;
-      box-shadow: var(--shadow-card);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 10px; padding: 14px 20px; color: var(--text);
+      font-size: 14px; box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 10px;
       animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideIn {
-      from { transform: translateX(50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+    @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <!-- Ambient Light Effects -->
   <div class="ambient-bg">
     <div class="ambient-orb orb-1"></div>
     <div class="ambient-orb orb-2"></div>
     <div class="ambient-orb orb-3"></div>
   </div>
 
-  <!-- Navigation Bar -->
   <nav class="navbar">
     <a href="index.html" class="nav-brand">
-      <div class="brand-icon">🔐</div>
+      <div class="brand-icon">🛡️</div>
       <div class="brand-title">Vault</div>
       <span class="brand-badge">Distributed S3</span>
     </a>
@@ -666,119 +587,116 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
   <header class="hero">
     <div class="hero-badge">
       <div class="hero-badge-pulse"></div>
-      Resilient Self-Healing Object Storage v2.5
+      Resilient Distributed Object Storage Platform v2.6
     </div>
 
     <h1 class="hero-title">
-      Zero Data Loss Distributed Storage. <span>Google Drive Simplicity.</span>
+      Zero Data Loss Distributed Storage. <span>S3 Resilience Underneath.</span>
     </h1>
 
     <p class="hero-desc">
-      Vault dynamically shards, replicates, and repairs data across unreliable independent storage nodes. Built with SHA-256 cryptographic anti-bit-rot scrubbers, automated P2P healing, and Supabase cloud metadata synchronization.
+      Vault partitions files into 2MB shards with cryptographic SHA-256 block checksums, replicates them across independent storage nodes, and heals missing replicas in sub-seconds with automated background scrubbers.
     </p>
 
     <div class="hero-cta-group">
-      <a href="dashboard.html" class="btn btn-primary btn-lg">📊 Open Live Dashboard</a>
-      <a href="files.html" class="btn btn-secondary btn-lg">📁 Test File Uploads</a>
-      <a href="chaos.html" class="btn btn-secondary btn-lg" style="border-color: rgba(244,63,94,0.4); color: var(--danger);">⚡ Launch Chaos Studio</a>
+      <a href="dashboard.html" class="btn btn-primary btn-lg">📊 Open Cluster Dashboard</a>
+      <a href="files.html" class="btn btn-secondary btn-lg">📁 Upload & Shard Files</a>
+      <a href="chaos.html" class="btn btn-secondary btn-lg" style="border-color: rgba(255,23,68,0.4); color: var(--danger);">⚡ Launch Chaos Studio</a>
     </div>
 
     <div class="hero-stats-row">
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--success);" id="statDurability">99.999%</div>
-        <div class="stat-label">Data Durability Guarantee</div>
+        <div class="stat-val" style="color: var(--success);">99.999%</div>
+        <div class="stat-label">Data Durability Index</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--primary);" id="statNodesCount">3 / 3</div>
-        <div class="stat-label">Active Storage Daemons</div>
+        <div class="stat-val" style="color: var(--primary);">3 / 3</div>
+        <div class="stat-label">Storage Daemons Online</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--secondary);" id="statChunkSize">2.0 MB</div>
+        <div class="stat-val" style="color: var(--secondary);">2.0 MB</div>
         <div class="stat-label">Multi-Part Chunk Buffer</div>
       </div>
       <div class="stat-box">
-        <div class="stat-val" style="color: var(--warning);" id="statRecoveryTime">&lt; 2.4s</div>
-        <div class="stat-label">Sub-Second Self Healing</div>
+        <div class="stat-val" style="color: var(--warning);">&lt; 1.8s</div>
+        <div class="stat-label">Automated Self-Healing</div>
       </div>
     </div>
   </header>
 
-  <!-- Interactive Live Cluster Sandbox Section -->
+  <!-- Interactive Sandbox Simulator Section -->
   <section class="sandbox-section">
     <div class="sandbox-card">
       <div class="sandbox-header">
         <div>
           <div class="sandbox-title">⚡ Interactive Fault-Tolerance Simulator</div>
-          <div class="sandbox-desc">Simulate a sudden storage node crash and observe the automatic background repair daemon in real-time.</div>
+          <div class="sandbox-desc">Simulate a storage node failure and watch the self-healing daemon re-replicate missing chunks to surviving nodes in real-time.</div>
         </div>
-        <a href="chaos.html" class="btn btn-sm btn-secondary">Open Full Chaos Studio →</a>
+        <a href="chaos.html" class="btn btn-sm btn-secondary">Full Chaos Studio →</a>
       </div>
 
-      <!-- Live Node Cards -->
-      <div class="cluster-preview-grid" id="sandboxNodesGrid">
-        <!-- Node 1 -->
+      <div class="cluster-preview-grid">
         <div class="node-preview-card healthy" id="cardNode1">
           <div class="node-head">
             <div class="node-name">Node Alpha</div>
             <span class="node-status-badge badge-healthy" id="badgeNode1">HEALTHY</span>
           </div>
-          <div class="node-meta">
-            <span>Port: 9001</span>
-            <span id="usageNode1">51.0 MB / 10 GB</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width: 28%;"></div>
-          </div>
+          <div class="node-meta"><span>Port: 9001</span><span>51.0 MB / 10 GB</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 28%;"></div></div>
           <button class="node-action-btn" onclick="toggleNodeSandbox(1)">☠️ Kill Node Alpha</button>
         </div>
 
-        <!-- Node 2 -->
         <div class="node-preview-card healthy" id="cardNode2">
           <div class="node-head">
             <div class="node-name">Node Beta</div>
             <span class="node-status-badge badge-healthy" id="badgeNode2">HEALTHY</span>
           </div>
-          <div class="node-meta">
-            <span>Port: 9002</span>
-            <span id="usageNode2">51.0 MB / 10 GB</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width: 28%;"></div>
-          </div>
+          <div class="node-meta"><span>Port: 9002</span><span>51.0 MB / 10 GB</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 28%;"></div></div>
           <button class="node-action-btn" onclick="toggleNodeSandbox(2)">☠️ Kill Node Beta</button>
         </div>
 
-        <!-- Node 3 -->
         <div class="node-preview-card healthy" id="cardNode3">
           <div class="node-head">
             <div class="node-name">Node Gamma</div>
             <span class="node-status-badge badge-healthy" id="badgeNode3">HEALTHY</span>
           </div>
-          <div class="node-meta">
-            <span>Port: 9003</span>
-            <span id="usageNode3">51.0 MB / 10 GB</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width: 28%;"></div>
-          </div>
+          <div class="node-meta"><span>Port: 9003</span><span>51.0 MB / 10 GB</span></div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 28%;"></div></div>
           <button class="node-action-btn" onclick="toggleNodeSandbox(3)">☠️ Kill Node Gamma</button>
         </div>
       </div>
 
-      <!-- Simulation Status Bar -->
       <div class="sim-bar">
         <div class="sim-info" id="simStatusText">
-          <span>🟢</span> All 3 storage nodes online. Replication factor: <strong>3× Quorum</strong>. Zero corrupted chunks.
+          <span>🟢</span> All 3 nodes online. Replication factor: <strong>3× Quorum</strong>. Zero data loss guarantee.
         </div>
-        <div class="sim-btn-group">
-          <button class="btn btn-sm btn-primary" onclick="simulateFileUpload()">📤 Test 10MB File Upload</button>
-          <button class="btn btn-sm btn-secondary" onclick="restoreAllNodes()">🔄 Restore All Nodes</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-sm btn-primary" onclick="simulateUpload()">📤 Test 10MB Payload Shard</button>
+          <button class="btn btn-sm btn-secondary" onclick="restoreAllNodes()">🔄 Restore All</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Multi-Language SDK Showcase -->
+  <section class="sdk-section">
+    <div class="section-header">
+      <div class="section-badge">Multi-Language Client SDKs</div>
+      <h2 class="section-title">Programmatic S3-Compatible API</h2>
+      <p class="section-desc">Interact with Vault directly using Python, TypeScript, or Go clients for distributed chunk streaming.</p>
+    </div>
+
+    <div class="code-box">
+      <span style="color: #FF5722;">from</span> vault_client <span style="color: #FF5722;">import</span> VaultClient<br/><br/>
+      <span style="color: #00E676;"># Initialize distributed client</span><br/>
+      client = VaultClient(gateway_url=<span style="color: #00E5FF;">"http://localhost:3000"</span>)<br/><br/>
+      <span style="color: #00E676;"># Shard and upload with 3x replication quorum</span><br/>
+      obj = client.upload_file(<span style="color: #00E5FF;">"dataset_2026.zip"</span>, replication_factor=3)<br/>
+      print(<span style="color: #00E5FF;">f"Stored {obj['totalChunks']} chunks with SHA-256: {obj['fileHash']}"</span>)
     </div>
   </section>
 
@@ -791,65 +709,47 @@
     </div>
 
     <div class="features-grid">
-      <!-- Feature 1 -->
       <div class="feature-card">
         <div class="feature-icon-wrap">🧩</div>
         <h3 class="feature-title">Dynamic Multi-Part Chunking</h3>
-        <p class="feature-desc">Files of any size are automatically partitioned into 2MB binary buffers, cryptographically hashed with SHA-256, and parallel-distributed across storage nodes.</p>
+        <p class="feature-desc">Files of any size are partitioned into 2MB binary buffers, hashed with SHA-256, and parallel-distributed across storage nodes.</p>
       </div>
 
-      <!-- Feature 2 -->
       <div class="feature-card">
-        <div class="feature-icon-wrap" style="color: var(--success); background: rgba(16,185,129,0.12);">🔄</div>
+        <div class="feature-icon-wrap" style="color: var(--success); background: rgba(0,230,118,0.12);">🔄</div>
         <h3 class="feature-title">Automated Replica Repair</h3>
         <p class="feature-desc">When a storage node crashes, the background healing daemon automatically re-replicates missing chunk fragments to healthy surviving nodes within seconds.</p>
       </div>
 
-      <!-- Feature 3 -->
       <div class="feature-card">
-        <div class="feature-icon-wrap" style="color: var(--warning); background: rgba(245,158,11,0.12);">🔍</div>
+        <div class="feature-icon-wrap" style="color: var(--warning); background: rgba(255,179,0,0.12);">🔍</div>
         <h3 class="feature-title">Anti-Bit Rot Scrubber</h3>
         <p class="feature-desc">The continuous background scrubber periodically verifies on-disk chunk checksums against database metadata, catching silent bit flips and repairing corrupted blocks.</p>
       </div>
 
-      <!-- Feature 4 -->
       <div class="feature-card">
-        <div class="feature-icon-wrap" style="color: var(--secondary); background: rgba(6,182,212,0.12);">⚡</div>
+        <div class="feature-icon-wrap" style="color: var(--secondary); background: rgba(0,229,255,0.12);">⚡</div>
         <h3 class="feature-title">Chaos Engineering Studio</h3>
         <p class="feature-desc">Interactive control panel allowing you to kill node processes, inject artificial network latency (2000ms), and simulate split-brain disaster recovery in real-time.</p>
       </div>
 
-      <!-- Feature 5 -->
       <div class="feature-card">
-        <div class="feature-icon-wrap" style="color: #EC4899; background: rgba(236,72,153,0.12);">🔐</div>
+        <div class="feature-icon-wrap" style="color: var(--accent); background: rgba(156,39,176,0.12);">🔐</div>
         <h3 class="feature-title">Client-Side Zero-Knowledge</h3>
         <p class="feature-desc">Browser-native AES-GCM 256-bit encryption before file sharding guarantees storage node operators hold zero readable user data.</p>
       </div>
 
-      <!-- Feature 6 -->
       <div class="feature-card">
-        <div class="feature-icon-wrap" style="color: var(--info); background: rgba(59,130,246,0.12);">📈</div>
+        <div class="feature-icon-wrap" style="color: var(--info); background: rgba(0,176,255,0.12);">📈</div>
         <h3 class="feature-title">Smart Storage Tiering</h3>
         <p class="feature-desc">Automated lifecycle policies dynamically elevate frequently accessed files to hot SSD replication tiers while compressing idle files into cold storage.</p>
       </div>
     </div>
   </section>
 
-  <!-- Supabase Cloud Banner -->
-  <div class="supabase-banner">
-    <div class="supabase-text">
-      <h3>⚡ Connected to Supabase Cloud</h3>
-      <p>Configured with your Supabase PostgreSQL project (<code>https://csrhmocmponregwceknr.supabase.co</code>) for real-time metadata indexing, access logging, and version tracking.</p>
-    </div>
-    <a href="settings.html" class="btn btn-primary">Configure Supabase Sync →</a>
-  </div>
-
-  <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
-      <div class="footer-copy">
-        <strong>Vault Platform</strong> © 2026. Distributed Object Storage System.
-      </div>
+      <div class="footer-copy"><strong>Vault Platform</strong> © 2026. Distributed Object Storage System.</div>
       <ul class="footer-links">
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="files.html">Files</a></li>
@@ -864,95 +764,78 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script>
-    // Theme Switcher
     function toggleTheme() {
       const html = document.documentElement;
-      const nextTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', nextTheme);
-      document.getElementById('themeToggle').textContent = nextTheme === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('vault_theme', nextTheme);
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('vault_theme', next);
     }
     const savedTheme = localStorage.getItem('vault_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-    // Check logged in user
     const currentUser = JSON.parse(localStorage.getItem('vault_user') || 'null');
     if (currentUser) {
       document.getElementById('authBtn').textContent = `👤 ${currentUser.name.split(' ')[0]}`;
       document.getElementById('authBtn').href = 'dashboard.html';
     }
 
-    // Toast Utility
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
       const t = document.createElement('div');
       t.className = 'toast';
-      t.innerHTML = `<span>${type === 'success' ? '✅' : type === 'danger' ? '☠️' : 'ℹ️'}</span> <span>${msg}</span>`;
+      t.innerHTML = `<span>${type === 'success' ? '✅' : type === 'danger' ? '⚠️' : 'ℹ️'}</span> <span>${msg}</span>`;
       c.appendChild(t);
       setTimeout(() => {
         t.style.opacity = '0';
         t.style.transform = 'translateY(10px)';
-        t.style.transition = 'all 0.3s ease';
+        t.style.transition = 'all 0.3s';
         setTimeout(() => t.remove(), 300);
       }, 3500);
     }
 
-    // Interactive Sandbox Simulator State
     let nodeStates = { 1: 'healthy', 2: 'healthy', 3: 'healthy' };
 
-    function toggleNodeSandbox(nodeId) {
-      const card = document.getElementById(`cardNode${nodeId}`);
-      const badge = document.getElementById(`badgeNode${nodeId}`);
+    function toggleNodeSandbox(id) {
+      const card = document.getElementById(`cardNode${id}`);
+      const badge = document.getElementById(`badgeNode${id}`);
       const btn = card.querySelector('.node-action-btn');
       const names = { 1: 'Alpha', 2: 'Beta', 3: 'Gamma' };
 
-      if (nodeStates[nodeId] === 'healthy') {
-        nodeStates[nodeId] = 'offline';
+      if (nodeStates[id] === 'healthy') {
+        nodeStates[id] = 'offline';
         card.className = 'node-preview-card offline';
         badge.className = 'node-status-badge badge-offline';
         badge.textContent = 'OFFLINE';
-        btn.textContent = `🔄 Reboot Node ${names[nodeId]}`;
-        btn.style.borderColor = 'var(--success)';
-        btn.style.color = 'var(--success)';
-        
-        showToast(`Node ${names[nodeId]} crashed! Auto-repair daemon triggered.`, 'danger');
-        document.getElementById('simStatusText').innerHTML = `<span>⚠️</span> Node ${names[nodeId]} is OFFLINE. Healing worker auto-replicating missing chunks to surviving nodes...`;
+        btn.textContent = `🔄 Reboot Node ${names[id]}`;
+        showToast(`Node ${names[id]} stopped! Auto-repair triggered.`, 'danger');
+        document.getElementById('simStatusText').innerHTML = `<span>⚠️</span> Node ${names[id]} OFFLINE. Healing worker auto-replicating missing chunks to surviving nodes...`;
       } else {
-        nodeStates[nodeId] = 'healthy';
+        nodeStates[id] = 'healthy';
         card.className = 'node-preview-card healthy';
         badge.className = 'node-status-badge badge-healthy';
         badge.textContent = 'HEALTHY';
-        btn.textContent = `☠️ Kill Node ${names[nodeId]}`;
-        btn.style.borderColor = '';
-        btn.style.color = '';
-
-        showToast(`Node ${names[nodeId]} rebooted and synchronized!`, 'success');
-        document.getElementById('simStatusText').innerHTML = `<span>🟢</span> Node ${names[nodeId]} restored. All 3 nodes online and healthy!`;
+        btn.textContent = `☠️ Kill Node ${names[id]}`;
+        showToast(`Node ${names[id]} restored & synchronized!`, 'success');
+        document.getElementById('simStatusText').innerHTML = `<span>🟢</span> Node ${names[id]} restored. All 3 nodes online and healthy!`;
       }
-      updateStats();
     }
 
     function restoreAllNodes() {
       [1, 2, 3].forEach(id => {
         if (nodeStates[id] !== 'healthy') toggleNodeSandbox(id);
       });
-      showToast('All storage nodes restored to full health!', 'success');
+      showToast('All storage nodes restored!', 'success');
     }
 
-    function updateStats() {
-      const healthyCount = Object.values(nodeStates).filter(s => s === 'healthy').length;
-      document.getElementById('statNodesCount').textContent = `${healthyCount} / 3`;
-      document.getElementById('statNodesCount').style.color = healthyCount === 3 ? 'var(--success)' : healthyCount >= 2 ? 'var(--warning)' : 'var(--danger)';
-    }
-
-    function simulateFileUpload() {
-      showToast('Chunking 10MB payload into 5 blocks (2MB each)...', 'info');
+    function simulateUpload() {
+      showToast('Splitting 10MB payload into 5 multi-part 2MB chunks...', 'info');
       setTimeout(() => {
-        showToast('SHA-256 Checksums computed! Writing replicas to nodes...', 'info');
+        showToast('SHA-256 Block hashes computed! Replicating to 3 nodes...', 'info');
       }, 600);
       setTimeout(() => {
-        showToast('✅ 10MB File successfully stored & replicated across 3 nodes!', 'success');
+        showToast('✅ 10MB File stored & replicated across Node Alpha, Beta, Gamma!', 'success');
       }, 1400);
     }
   </script>
